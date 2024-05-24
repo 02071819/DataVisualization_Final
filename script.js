@@ -1,7 +1,7 @@
 var data;
 
-d3.csv('ds_salaries.csv', function(dataset) {
-  data = dataset.map(function(d) {
+d3.csv('ds_salaries.csv', function (dataset) {
+  data = dataset.map(function (d) {
     d.salary_in_usd = +d.salary_in_usd;
     d.remote_ratio = +d.remote_ratio;
     d.salary = +d.salary;
@@ -35,7 +35,9 @@ function buildPlot() {
   svgFrame.append('g')
     .attr('class', 'x_axis')
     .attr('transform', 'translate(0,' + (h - padding) + ')')
-    .call(xAxis);
+    .call(xAxis)
+    .selectAll("text") // 選擇所有 x 軸標籤
+    .attr("transform", "rotate(-45)"); // 旋轉 45 度
 
   svgFrame.append('g')
     .attr('class', 'y_axis')
@@ -64,7 +66,9 @@ function buildPlot() {
     svgFrame.select(".x_axis")
       .transition()
       .duration(1000)
-      .call(xAxis);
+      .call(xAxis)
+      .selectAll("text") // 選擇所有 x 軸標籤
+      .attr("transform", "rotate(-45)"); // 旋轉 45 度
 
     svgFrame.select(".y_axis")
       .transition()
