@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Average Salary by Company Size</title>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+        }
+
+        .line {
+            fill: none;
+            stroke-width: 2px;
+        }
+
+        .legend rect {
+            stroke-width: 2;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        #chart {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <h2>Average Salary by Company Size</h2>
+    <div id="chart"></div>
+    <script src="script4.js"></script>
+</body>
+</html>

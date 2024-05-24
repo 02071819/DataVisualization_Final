@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Choropleth Map</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://d3js.org/topojson.v2.min.js"></script>
+    <script src="script3.js" defer></script>
+    <style>
+      .country {
+        stroke: #fff;
+        stroke-width: 0.5px;
+      }
+      .legend {
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Choropleth Map</h2>
+    <svg id="map" width="960" height="600"></svg>
+  </body>
+</html>
