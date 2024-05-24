@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Visualization Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+<body>
+    <!-- 篩選選項 -->
+    <div>
+        <label for="yearFilter">Work Year:</label>
+        <select id="yearFilter" onchange="updateChart()">
+            <option value="all">All</option>
+        </select>
+    </div>
+
+    <!-- 職位篩選選項 -->
+    <div>
+        <label for="jobFilter">Job Titles:</label>
+        <div id="jobFilter"></div>
+    </div>
+
+    <!-- 散佈圖下拉選單 -->
+    <div>
+        <label for="xAxisSelect">X-Axis:</label>
+        <select id="xAxisSelect" onchange="updateScatterPlot()">
+            <option value="remote_ratio">Remote Ratio</option>
+            <option value="salary_in_usd">Salary in USD</option>
+            <option value="work_year">Work Year</option>
+        </select>
+
+        <label for="yAxisSelect">Y-Axis:</label>
+        <select id="yAxisSelect" onchange="updateScatterPlot()">
+            <option value="salary_in_usd">Salary in USD</option>
+            <option value="remote_ratio">Remote Ratio</option>
+            <option value="work_year">Work Year</option>
+        </select>
+    </div>
+
+    <!-- 圖表容器 -->
+    <div id="chart"></div>
+    
+    <!-- 折線圖容器 -->
+    <div id="lineChart"></div>
+
+    <!-- 散佈圖容器 -->
+    <div id="scatterPlot"></div>
+
+    <!-- Tooltip -->
+    <div class="tooltip" style="opacity: 0;"></div>
+
+    <script src="script5.js"></script>
+</body>
+</html>

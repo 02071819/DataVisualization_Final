@@ -58,3 +58,36 @@ svg {
   #barchart{
     padding-left: 100px;
   }
+
+/* 添加一些基本的樣式 */
+.bar {
+  fill: steelblue;
+}
+.bar:hover {
+  fill: orange;
+}
+.axis-label {
+  font-size: 12px;
+}
+#jobFilter {
+  max-height: 200px;
+  overflow-y: auto;
+}
+.job-checkbox {
+  margin: 5px 0;
+}
+#lineChart {
+  margin-top: 50px;
+}
+.tooltip {
+  position: absolute;
+  text-align: left;
+  width: auto;
+  height: auto;
+  padding: 8px;
+  font: 12px sans-serif;
+  background: white;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
+}
