@@ -1,66 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Data Visualization Dashboard</title>
-    <link rel="stylesheet" href="style.css" />
-    <script src="https://d3js.org/d3.v6.min.js"></script>
-    <script src="https://unpkg.com/topojson@3"></script>
-  </head>
-  <body>
-    <!-- 篩選選項 -->
-    <div class="year_filter">
-      <label for="yearFilter">Work Year:</label>
-      <select id="yearFilter" onchange="updateChart()">
-        <option value="all">All</option>
-      </select>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Visualization Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <script src="https://unpkg.com/topojson@3"></script>
+</head>
+
+<body>
+  <!-- 篩選選項 -->
+  <div class="year_filter">
+    <label for="yearFilter">Work Year:</label>
+    <select id="yearFilter" onchange="updateChart()">
+      <option value="all">All</option>
+    </select>
+  </div>
+
+  <div class="top_div">
+    <!-- 職位篩選選項 -->
+    <div class="job_filter">
+      <label for="jobFilter">Job Titles:</label>
+      <div id="jobFilter"></div>
     </div>
 
-    <div class="top_div">
-      <!-- 職位篩選選項 -->
-      <div class="job_filter">
-        <label for="jobFilter">Job Titles:</label>
-        <div id="jobFilter"></div>
-      </div>
+    <div>
+      <!-- 地理圖容器 -->
+      <div id="worldMap"></div>
 
-      <div>
-        <!-- 地理圖容器 -->
-        <div id="worldMap"></div>
-
-        <!-- 地理圖圖例容器 -->
-        <div id="legendContainer"></div>
-      </div>
+      <!-- 地理圖圖例容器 -->
+      <div id="legendContainer"></div>
     </div>
+  </div>
 
+  <div class="middle_section">
     <!-- 長條圖容器 -->
     <div id="chart"></div>
 
-    <!-- 折線面積圖容器 -->
-    <div id="lineChart"></div>
+    <!-- 圓餅圖容器 -->
+    <div id="pieChart"></div>
 
-    <!-- 散佈圖下拉選單 -->
-    <div>
-      <label for="xAxisSelect">X-Axis:</label>
-      <select id="xAxisSelect" onchange="updateScatterPlot()">
-        <option value="remote_ratio">Remote Ratio</option>
-        <option value="salary_in_usd">Salary in USD</option>
-        <option value="work_year">Work Year</option>
-      </select>
+    <!-- 圓餅圖容器2 -->
+    <div id="pieChart2"></div>
+  </div>
 
-      <label for="yAxisSelect">Y-Axis:</label>
-      <select id="yAxisSelect" onchange="updateScatterPlot()">
-        <option value="salary_in_usd">Salary in USD</option>
-        <option value="remote_ratio">Remote Ratio</option>
-        <option value="work_year">Work Year</option>
-      </select>
-    </div>
-    <!-- 散佈圖容器 -->
-    <div id="scatterPlot"></div>
+  <!-- 折線面積圖容器 -->
+  <div id="lineChart"></div>
 
-    <!-- Tooltip -->
-    <div class="tooltip" style="opacity: 0"></div>
+  <!-- 散佈圖下拉選單 -->
+  <div>
+    <label for="xAxisSelect">X-Axis:</label>
+    <select id="xAxisSelect" onchange="updateScatterPlot()">
+      <option value="remote_ratio">Remote Ratio</option>
+      <option value="salary_in_usd">Salary in USD</option>
+      <option value="work_year">Work Year</option>
+    </select>
 
-    <script src="script5.js"></script>
-  </body>
+    <label for="yAxisSelect">Y-Axis:</label>
+    <select id="yAxisSelect" onchange="updateScatterPlot()">
+      <option value="salary_in_usd">Salary in USD</option>
+      <option value="remote_ratio">Remote Ratio</option>
+      <option value="work_year">Work Year</option>
+    </select>
+  </div>
+  <!-- 散佈圖容器 -->
+  <div id="scatterPlot"></div>
+
+  <!-- Tooltip -->
+  <div class="tooltip" style="opacity: 0"></div>
+
+  <script src="script5.js"></script>
+</body>
+
 </html>
