@@ -84,9 +84,9 @@ const path = d3.geoPath().projection(projection);
 
 const colorScale = d3.scaleSequential(d3.interpolateGreens);
 
-// 初始化面積圖
+// 初始化折線面積圖
 const lineMargin = { top: 20, right: 30, bottom: 40, left: 40 },
-  lineWidth = 960 - lineMargin.left - lineMargin.right,
+  lineWidth = 1160 - lineMargin.left - lineMargin.right,
   lineHeight = 300 - lineMargin.top - lineMargin.bottom;
 
 const lineSvg = d3
@@ -141,35 +141,13 @@ const scatterYAxis = scatterSvg.append("g").attr("class", "axis-label");
 // 添加tooltip元素
 const tooltip = d3.select(".tooltip");
 
-// 餅圖設置
-const pieMargin = { top: 20, right: 30, bottom: 40, left: 40 },
-  pieWidth = 450 - pieMargin.left - pieMargin.right,
-  pieHeight = 450 - pieMargin.top - pieMargin.bottom,
-  pieRadius = Math.min(pieWidth, pieHeight) / 2;
-
-const pieSvg = d3
-  .select("#pieChart")
-  .append("svg")
-  .attr("width", pieWidth + pieMargin.left + pieMargin.right)
-  .attr("height", pieHeight + pieMargin.top + pieMargin.bottom)
-  .append("g")
-  .attr("transform", `translate(${pieWidth / 2 + pieMargin.left},${pieHeight / 2 + pieMargin.top})`);
-
-  //第二張圖
-  const pieSvg2 = d3
-  .select("#pieChart2")
-  .append("svg")
-  .attr("width", pieWidth + pieMargin.left + pieMargin.right)
-  .attr("height", pieHeight + pieMargin.top + pieMargin.bottom)
-  .append("g")
-  .attr("transform", `translate(${pieWidth / 2 + pieMargin.left},${pieHeight / 2 + pieMargin.top})`);
-
 // 讀取資料並初始化圖表
 d3.csv("ds_salaries.csv").then((data) => {
   data.forEach((d) => {
     d.salary_in_usd = +d.salary_in_usd;
     d.remote_ratio = +d.remote_ratio;
     d.work_year = +d.work_year; // 確保 work_year 是數字
+    d.company_location = d.company_location || "Unknown"; // 確保 company_location 有效
   });
 
   // 初始化篩選選項
@@ -190,44 +168,86 @@ d3.csv("ds_salaries.csv").then((data) => {
         `<input type="checkbox" value="${job}" checked onchange="updateChart()"> ${job}`
       );
   });
+  // 餅圖設置
+  const pieMargin = { top: 20, right: 30, bottom: 40, left: 40 },
+    pieWidth = 380 - pieMargin.left - pieMargin.right,
+    pieHeight = 380 - pieMargin.top - pieMargin.bottom,
+    pieRadius = Math.min(pieWidth, pieHeight) / 2;
 
-  // 初始顯示所有資料
-  updateChart(data);
+  const pieSvg = d3
+    .select("#pieChart")
+    .append("svg")
+    .attr("width", pieWidth + pieMargin.left + pieMargin.right)
+    .attr("height", pieHeight + pieMargin.top + pieMargin.bottom)
+    .append("g")
+    .attr(
+      "transform",
+      `translate(${pieWidth / 2 + pieMargin.left},${
+        pieHeight / 2 + pieMargin.top
+      })`
+    );
 
-   // 處理並繪製圆饼图
-   const experienceLevelData = Array.from(d3.rollup(data, v => v.length, d => d.experience_level), ([key, value]) => ({ key, value }));
+  const pieSvg2 = d3
+    .select("#pieChart2")
+    .append("svg")
+    .attr("width", pieWidth + pieMargin.left + pieMargin.right)
+    .attr("height", pieHeight + pieMargin.top + pieMargin.bottom)
+    .append("g")
+    .attr(
+      "transform",
+      `translate(${pieWidth / 2 + pieMargin.left},${
+        pieHeight / 2 + pieMargin.top
+      })`
+    );
 
-   console.log("experienceLevelData:", experienceLevelData); // 調適輸出
+  // 處理並繪製第一個圓餅圖
+  const experienceLevelData = Array.from(
+    d3.rollup(
+      data,
+      (v) => v.length,
+      (d) => d.experience_level
+    ),
+    ([key, value]) => ({ key, value })
+  );
 
-   const pie = d3.pie().value(d => d.value);
- 
-   const arc = d3
-     .arc()
-     .outerRadius(pieRadius - 10)
-     .innerRadius(pieRadius - 90);
- 
-   const pieColor = d3.scaleOrdinal()
-     .domain(experienceLevelData.map(d => d.key))
-     .range(d3.schemeCategory10);
- 
-   const g = pieSvg.selectAll(".arc")
-     .data(pie(experienceLevelData))
-     .enter().append("g")
-     .attr("class", "arc");
- 
-   g.append("path")
-     .attr("d", arc)
-     .style("fill", d => pieColor(d.data.key));
- 
-   g.append("text")
-     .attr("transform", d => `translate(${arc.centroid(d)})`)
-     .attr("dy", ".35em")
-     .style("font-size", "15px")
-     .style("text-anchor", "middle") 
-     .style("font-weight", "700")  
-     .text(d => `${d.data.key}: ${(d.data.value / d3.sum(experienceLevelData.map(dd => dd.value)) * 100).toFixed(1)}%`);
- 
-  // 添加圖例
+  const pie = d3.pie().value((d) => d.value);
+
+  const arc = d3
+    .arc()
+    .outerRadius(pieRadius - 10)
+    .innerRadius(pieRadius - 90);
+
+  const pieColor = d3
+    .scaleOrdinal()
+    .domain(experienceLevelData.map((d) => d.key))
+    .range(d3.schemeCategory10);
+
+  const g = pieSvg
+    .selectAll(".arc")
+    .data(pie(experienceLevelData))
+    .enter()
+    .append("g")
+    .attr("class", "arc");
+
+  g.append("path")
+    .attr("d", arc)
+    .style("fill", (d) => pieColor(d.data.key));
+
+  g.append("text")
+    .attr("transform", (d) => `translate(${arc.centroid(d)})`)
+    .attr("dy", ".35em")
+    .style("font-size", "15px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "700")
+    .text(
+      (d) =>
+        `${d.data.key}: ${(
+          (d.data.value / d3.sum(experienceLevelData.map((dd) => dd.value))) *
+          100
+        ).toFixed(1)}%`
+    );
+
+  // 添加第一個圓餅圖的圖例
   const legend = pieSvg
     .append("g")
     .attr("transform", `translate(${pieWidth / 2},${-pieHeight / 2 + 20})`);
@@ -251,43 +271,56 @@ d3.csv("ds_salaries.csv").then((data) => {
     .attr("x", 24)
     .attr("y", 9)
     .attr("dy", ".35em")
-    .text(d => d);
+    .text((d) => d);
 
+  // 處理並繪製第二個圓餅圖
+  const companysizeData = Array.from(
+    d3.rollup(
+      data,
+      (v) => v.length,
+      (d) => d.company_size
+    ),
+    ([key, value]) => ({ key, value })
+  );
 
-   // 處理並繪製圆饼图
-   const companysizeData = Array.from(d3.rollup(data, v => v.length, d => d.company_size), ([key, value]) => ({ key, value }));
+  const pie2 = d3.pie().value((d) => d.value);
 
-   console.log("companyData:", companysizeData); // 調適輸出
+  const arc2 = d3
+    .arc()
+    .outerRadius(pieRadius - 10)
+    .innerRadius(pieRadius - 90);
 
-   const pie2 = d3.pie().value(d => d.value);
- 
-   const arc2 = d3
-     .arc()
-     .outerRadius(pieRadius - 10)
-     .innerRadius(pieRadius - 90);
- 
-   const pieColor2 = d3.scaleOrdinal()
-     .domain(companysizeData.map(d => d.key))
-     .range(d3.schemeCategory10);
- 
-   const g2 = pieSvg2.selectAll(".arc")
-     .data(pie2(companysizeData))
-     .enter().append("g")
-     .attr("class", "arc");
- 
-   g2.append("path")
-     .attr("d", arc2)
-     .style("fill", d => pieColor2(d.data.key));
- 
-   g2.append("text")
-     .attr("transform", d => `translate(${arc2.centroid(d)})`)
-     .attr("dy", ".35em")
-     .style("font-size", "15px")
-     .style("text-anchor", "middle") 
-     .style("font-weight", "700")  
-     .text(d => `${d.data.key}: ${(d.data.value / d3.sum(companysizeData.map(dd => dd.value)) * 100).toFixed(1)}%`);
- 
-  // 添加圖例
+  const pieColor2 = d3
+    .scaleOrdinal()
+    .domain(companysizeData.map((d) => d.key))
+    .range(d3.schemeCategory10);
+
+  const g2 = pieSvg2
+    .selectAll(".arc")
+    .data(pie2(companysizeData))
+    .enter()
+    .append("g")
+    .attr("class", "arc");
+
+  g2.append("path")
+    .attr("d", arc2)
+    .style("fill", (d) => pieColor2(d.data.key));
+
+  g2.append("text")
+    .attr("transform", (d) => `translate(${arc2.centroid(d)})`)
+    .attr("dy", ".35em")
+    .style("font-size", "15px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "700")
+    .text(
+      (d) =>
+        `${d.data.key}: ${(
+          (d.data.value / d3.sum(companysizeData.map((dd) => dd.value))) *
+          100
+        ).toFixed(1)}%`
+    );
+
+  // 添加第二個圓餅圖的圖例
   const legend2 = pieSvg2
     .append("g")
     .attr("transform", `translate(${pieWidth / 2},${-pieHeight / 2 + 20})`);
@@ -311,7 +344,10 @@ d3.csv("ds_salaries.csv").then((data) => {
     .attr("x", 24)
     .attr("y", 9)
     .attr("dy", ".35em")
-    .text(d => d);
+    .text((d) => d);
+
+  // 初始顯示所有資料
+  updateChart(data);
 
   // 定義更新圖表的函數
   function updateChart(filteredData = data) {
@@ -418,7 +454,7 @@ d3.csv("ds_salaries.csv").then((data) => {
 
     areas.exit().remove();
 
-    // 添加圖例
+    // 添加堆積面積圖圖例
     const legend = lineSvg.selectAll(".legend").data(keys, (d) => d);
 
     const legendEnter = legend
@@ -446,6 +482,111 @@ d3.csv("ds_salaries.csv").then((data) => {
 
     // 更新散佈圖
     updateScatterPlot(displayData);
+
+    // 更新圓餅圖
+    updatePieCharts(displayData);
+  }
+  // 定義更新圓餅圖的函數
+  function updatePieCharts(data) {
+    // 更新第一個圓餅圖
+    const experienceLevelData = Array.from(
+      d3.rollup(
+        data,
+        (v) => v.length,
+        (d) => d.experience_level
+      ),
+      ([key, value]) => ({ key, value })
+    );
+
+    const pie = d3.pie().value((d) => d.value);
+
+    const arc = d3
+      .arc()
+      .outerRadius(pieRadius - 10)
+      .innerRadius(pieRadius - 90);
+
+    const pieColor = d3
+      .scaleOrdinal()
+      .domain(experienceLevelData.map((d) => d.key))
+      .range(d3.schemeCategory10);
+
+    const g = pieSvg.selectAll(".arc").data(pie(experienceLevelData));
+
+    g.enter()
+      .append("g")
+      .attr("class", "arc")
+      .append("path")
+      .attr("d", arc)
+      .style("fill", (d) => pieColor(d.data.key))
+      .merge(g.select("path"))
+      .attr("d", arc)
+      .style("fill", (d) => pieColor(d.data.key));
+
+    g.select("text")
+      .attr("transform", (d) => `translate(${arc.centroid(d)})`)
+      .attr("dy", ".35em")
+      .style("font-size", "15px")
+      .style("text-anchor", "middle")
+      .style("font-weight", "700")
+      .text(
+        (d) =>
+          `${d.data.key}: ${(
+            (d.data.value / d3.sum(experienceLevelData.map((dd) => dd.value))) *
+            100
+          ).toFixed(1)}%`
+      );
+
+    g.exit().remove();
+
+    // 更新第二個圓餅圖
+    const companySizeData = Array.from(
+      d3.rollup(
+        data,
+        (v) => v.length,
+        (d) => d.company_size
+      ),
+      ([key, value]) => ({ key, value })
+    );
+
+    const pie2 = d3.pie().value((d) => d.value);
+
+    const arc2 = d3
+      .arc()
+      .outerRadius(pieRadius - 10)
+      .innerRadius(pieRadius - 90);
+
+    const pieColor2 = d3
+      .scaleOrdinal()
+      .domain(companySizeData.map((d) => d.key))
+      .range(d3.schemeCategory10);
+
+    const g2 = pieSvg2.selectAll(".arc").data(pie2(companySizeData));
+
+    g2.enter()
+      .append("g")
+      .attr("class", "arc")
+      .append("path")
+      .attr("d", arc2)
+      .style("fill", (d) => pieColor2(d.data.key))
+      .merge(g2.select("path"))
+      .attr("d", arc2)
+      .style("fill", (d) => pieColor2(d.data.key));
+
+    g2.select("text")
+      .attr("transform", (d) => `translate(${arc2.centroid(d)})`)
+      .attr("dy", ".35em")
+      .style("font-size", "15px")
+      .style("text-anchor", "middle")
+      .style("font-weight", "700")
+      .text(
+        (d) =>
+          `${d.data.key}: ${(
+            (d.data.value / d3.sum(companySizeData.map((dd) => dd.value))) *
+            100
+          ).toFixed(1)}%`
+      );
+
+    g2.exit().remove();
   }
 
   function updateScatterPlot(data) {
@@ -562,12 +703,10 @@ d3.csv("ds_salaries.csv").then((data) => {
       linearGradient
         .selectAll("stop")
         .data(
-          colorScale
-            .ticks()
-            .map((t, i, n) => ({
-              offset: `${(100 * i) / n.length}%`,
-              color: colorScale(t),
-            }))
+          colorScale.ticks().map((t, i, n) => ({
+            offset: `${(100 * i) / n.length}%`,
+            color: colorScale(t),
+          }))
         )
         .enter()
         .append("stop")

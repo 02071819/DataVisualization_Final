@@ -10,7 +10,7 @@ body {
   
 svg {
     overflow: visible;
-    margin: 10px;
+    margin: 20px;
   }
   
   .uiPanel {
@@ -71,9 +71,19 @@ svg {
 }
 .year_filter {
   width: 250px;
+  margin: 20px;
+  padding-left: 100px;
 }
 .top_div {
   display: flex;
+  padding-left: 100px;
+}
+.middle_div {
+  display: flex;
+  padding-left: 100px;
+}
+.end_div {
+  padding-left: 60px;
 }
 #jobFilter {
   max-height: 500px;
@@ -85,8 +95,15 @@ svg {
 .job-checkbox {
   margin: 5px 0;
 }
-#lineChart {
-  margin-top: 50px;
+.scatterplot_part {
+  width: 1130px;
+}
+.scatterplot_control {
+  padding-top: 20px;
+  padding-left: 100px;
+}
+#scatterPlot {
+  padding-left: 100px;
 }
 .tooltip {
   position: absolute;
@@ -100,3 +117,4 @@ svg {
   border-radius: 8px;
   pointer-events: none;
 }
+
