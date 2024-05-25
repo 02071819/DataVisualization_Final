@@ -10,7 +10,7 @@ body {
   
 svg {
     overflow: visible;
-    margin: 50px;
+    margin: 10px;
   }
   
   .uiPanel {
@@ -69,9 +69,18 @@ svg {
 .axis-label {
   font-size: 12px;
 }
+.year_filter {
+  width: 250px;
+}
+.top_div {
+  display: flex;
+}
 #jobFilter {
-  max-height: 200px;
+  max-height: 500px;
   overflow-y: auto;
+}
+.job_filter {
+  width: 500px;
 }
 .job-checkbox {
   margin: 5px 0;

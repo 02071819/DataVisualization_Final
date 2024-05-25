@@ -14,12 +14,75 @@ const svg = d3
 const x = d3.scaleBand().range([0, width]).padding(0.1);
 const y = d3.scaleLinear().range([height, 0]);
 
+const locationMapping = {
+  US: "United States of America",
+  CA: "Canada",
+  BR: "Brazil",
+  CL: "Chile",
+  CO: "Colombia",
+  MX: "Mexico",
+  RU: "Russia",
+  HN: "Honduras",
+  CN: "China",
+  FR: "France",
+  GB: "United Kingdom",
+  IE: "Ireland",
+  ES: "Spain",
+  PT: "Portugal",
+  IN: "India",
+  AU: "Australia",
+  NZ: "New Zealand",
+  MY: "Malaysia",
+  PK: "Pakistan",
+  IR: "Iran",
+  TR: "Turkey",
+  IQ: "Iraq",
+  UA: "Ukraine",
+  RO: "Romania",
+  PL: "Poland",
+  JP: "Japan",
+  VN: "Vietnam",
+  HU: "Hungary",
+  IT: "Italy",
+  SI: "Slovania",
+  AT: "Austria",
+  DE: "Germany",
+  NL: "Netherland",
+  BE: "Belgium",
+  DZ: "Algeria",
+  NG: "Nigeria",
+  KE: "Kenya",
+  DK: "Denmark",
+  NL: "Netherlands",
+  CZ: "Czechia",
+  CH: "Switzerland",
+  // 添加其他映射
+};
+
 const xAxis = svg
   .append("g")
   .attr("transform", `translate(0,${height})`)
   .attr("class", "axis-label");
 
 const yAxis = svg.append("g").attr("class", "axis-label");
+
+// 初始化地理圖
+const worldMapSvg = d3
+  .select("#worldMap")
+  .append("svg")
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+  .attr("transform", `translate(${margin.left},${margin.top})`);
+
+const projection = d3
+  .geoNaturalEarth1()
+  .scale(150)
+  .translate([width / 2, height / 2]);
+
+const path = d3.geoPath().projection(projection);
+
+const colorScale = d3.scaleSequential(d3.interpolateGreens);
 
 // 初始化面積圖
 const lineMargin = { top: 20, right: 30, bottom: 40, left: 40 },
@@ -150,6 +213,9 @@ d3.csv("ds_salaries.csv").then((data) => {
       .attr("height", (d) => height - y(d.salary_in_usd));
 
     bars.exit().remove();
+
+    // 更新地理圖
+    updateWorldMap(displayData);
 
     // 更新堆積面積圖
     const nestedData = d3
@@ -285,6 +351,122 @@ d3.csv("ds_salaries.csv").then((data) => {
       .style("fill", (d) => color(d.job_title));
 
     points.exit().remove();
+  }
+
+  function updateWorldMap(data) {
+    const locationCount = d3.rollup(
+      data,
+      (v) => v.length,
+      (d) => locationMapping[d.company_location] || d.company_location
+    );
+
+    colorScale.domain([0, d3.max(Array.from(locationCount.values()))]);
+
+    d3.json("world-110m.json").then((worldData) => {
+      const countries = worldData.features;
+
+      const paths = worldMapSvg.selectAll("path").data(countries);
+
+      paths
+        .enter()
+        .append("path")
+        .attr("d", path)
+        .merge(paths)
+        .attr("fill", (d) => {
+          const count = locationCount.get(d.properties.name) || 0;
+          return count > 0 ? colorScale(count) : "#ccc";
+        })
+        .attr("stroke", "#000") // 添加黑色邊界線
+        .attr("stroke-width", 0.5)
+        .on("mouseover", function (event, d) {
+          const count = locationCount.get(d.properties.name) || 0;
+          tooltip.transition().duration(200).style("opacity", 0.9);
+          tooltip
+            .html(`${d.properties.name}: ${count}`)
+            .style("left", event.pageX + 5 + "px")
+            .style("top", event.pageY - 28 + "px");
+        })
+        .on("mousemove", function (event) {
+          tooltip
+            .style("left", event.pageX + 5 + "px")
+            .style("top", event.pageY - 28 + "px");
+        })
+        .on("mouseout", function () {
+          tooltip.transition().duration(500).style("opacity", 0);
+        });
+
+      paths.exit().remove();
+
+      // 檢查圖例是否已存在，避免重複生成
+      if (!d3.select("#legendContainer svg").empty()) {
+        return;
+      }
+
+      // 添加圖例
+      const legendWidth = 300;
+      const legendHeight = 10;
+      const legendSvg = d3
+        .select("#legendContainer")
+        .append("svg")
+        .attr("width", legendWidth)
+        .attr("height", 50);
+
+      const defs = legendSvg.append("defs");
+
+      const linearGradient = defs
+        .append("linearGradient")
+        .attr("id", "linear-gradient");
+
+      linearGradient
+        .selectAll("stop")
+        .data(
+          colorScale
+            .ticks()
+            .map((t, i, n) => ({
+              offset: `${(100 * i) / n.length}%`,
+              color: colorScale(t),
+            }))
+        )
+        .enter()
+        .append("stop")
+        .attr("offset", (d) => d.offset)
+        .attr("stop-color", (d) => d.color);
+
+      legendSvg
+        .append("rect")
+        .attr("width", legendWidth)
+        .attr("height", legendHeight)
+        .style("fill", "url(#linear-gradient)");
+
+      legendSvg.append("text").attr("x", 0).attr("y", 30).text("1");
+
+      legendSvg
+        .append("text")
+        .attr("x", legendWidth - 20)
+        .attr("y", 30)
+        .text(d3.max(Array.from(locationCount.values())));
+
+      legendSvg
+        .append("text")
+        .attr("x", legendWidth / 2 - 20)
+        .attr("y", 50)
+        .text("公司總數");
+
+      legendSvg
+        .append("g")
+        .attr("class", "axis")
+        .attr("transform", `translate(0,${legendHeight})`)
+        .call(
+          d3
+            .axisBottom(
+              d3
+                .scaleLinear()
+                .domain([0, d3.max(Array.from(locationCount.values()))])
+                .range([0, legendWidth])
+            )
+            .ticks(5)
+        );
+    });
   }
 
   // 使 updateChart 和 updateScatterPlot 函數在全局範圍內可訪問
