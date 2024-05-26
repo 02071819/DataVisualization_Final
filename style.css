@@ -2,7 +2,6 @@
  border: 1px solid purple;
 } */
 
-
 body {
     font-family: Arial, sans-serif
   }
@@ -60,6 +59,27 @@ svg {
   }
 
 /* 添加一些基本的樣式 */
+/* Header styles */
+.header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background-color: white;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: 50px; /* 固定高度 */
+}
+
+.hamburger-menu {
+  cursor: pointer;
+  font-size: 24px;
+  width: 10px;
+  margin-right: 20px;
+}
+
 .bar {
   fill: steelblue;
 }
@@ -70,13 +90,38 @@ svg {
   font-size: 12px;
 }
 .year_filter {
-  width: 250px;
-  margin: 20px;
-  padding-left: 100px;
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
 }
+.year_filter label {
+  padding: 10px;
+}
+/* Sidebar styles */
+.sidebar {
+  position: fixed;
+  top: 73px; /* 調整以符合 header 高度 */
+  left: -450px; /* 調整以符合 sidebar 寬度 */
+  width: 450px;
+  height: calc(100% - 50px); /* 減去 header 高度 */
+  background-color: #f8f9fa;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  transition: left 0.3s;
+  z-index: 1000;
+}
+
+.sidebar.open {
+  left: 0;
+}
+/* Main content styles */
+.main-content {
+  margin-top: 50px; /* 調整以符合 header 高度 */
+}
+
 .top_div {
   display: flex;
-  padding-left: 100px;
+  padding-left: 50px;
 }
 .middle_div {
   display: flex;
@@ -86,11 +131,11 @@ svg {
   padding-left: 60px;
 }
 #jobFilter {
-  max-height: 500px;
+  max-height: 650px;
   overflow-y: auto;
 }
 .job_filter {
-  width: 500px;
+  padding: 10px;
 }
 .job-checkbox {
   margin: 5px 0;

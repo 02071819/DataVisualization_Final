@@ -1,3 +1,16 @@
+function toggleMenu() {
+  const sidebar = document.getElementById("sidebar");
+  const hamburgerMenu = document.getElementById("hamburgerMenu");
+
+  if (sidebar.classList.contains("open")) {
+    sidebar.classList.remove("open");
+    hamburgerMenu.innerHTML = "&#9776;"; // Hamburger icon
+  } else {
+    sidebar.classList.add("open");
+    hamburgerMenu.innerHTML = "&times;"; // Close icon
+  }
+}
+
 // 初始化圖表和篩選選項
 const margin = { top: 20, right: 30, bottom: 40, left: 40 },
   width = 960 - margin.left - margin.right,
@@ -170,8 +183,8 @@ d3.csv("ds_salaries.csv").then((data) => {
   });
   // 餅圖設置
   const pieMargin = { top: 20, right: 30, bottom: 40, left: 40 },
-    pieWidth = 380 - pieMargin.left - pieMargin.right,
-    pieHeight = 380 - pieMargin.top - pieMargin.bottom,
+    pieWidth = 350 - pieMargin.left - pieMargin.right,
+    pieHeight = 350 - pieMargin.top - pieMargin.bottom,
     pieRadius = Math.min(pieWidth, pieHeight) / 2;
 
   const pieSvg = d3
@@ -215,7 +228,7 @@ d3.csv("ds_salaries.csv").then((data) => {
   const arc = d3
     .arc()
     .outerRadius(pieRadius - 10)
-    .innerRadius(pieRadius - 90);
+    .innerRadius(pieRadius - 70);
 
   const pieColor = d3
     .scaleOrdinal()
