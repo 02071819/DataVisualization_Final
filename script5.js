@@ -107,7 +107,7 @@ const lineSvg = d3
   .append("svg")
   .attr("width", lineWidth + lineMargin.left + lineMargin.right)
   .attr("height", lineHeight + lineMargin.top + lineMargin.bottom)
-  .append("g")
+  // .append("g")
   .attr("transform", `translate(${lineMargin.left},${lineMargin.top})`);
 
 const lineX = d3.scaleLinear().range([0, lineWidth]);
@@ -169,18 +169,42 @@ d3.csv("ds_salaries.csv").then((data) => {
   years.forEach((year) => {
     yearFilter.append("option").attr("value", year).text(year);
   });
+  /*
+    const jobs = Array.from(new Set(data.map((d) => d.job_title)));
+    const jobFilter = d3.select("#jobFilter");
+    jobs.forEach((job) => {
+      jobFilter
+        .append("div")
+        .attr("class", "job-checkbox")
+        .append("label")
+        .html(
+          `<input type="checkbox" value="${job}" checked onchange="updateChart()"> ${job}`
+        );
+    });*/
 
+  // 計算每個工作標題的數量
+  const jobCounts = Array.from(d3.rollup(
+    data,
+    v => v.length,
+    d => d.job_title
+  ), ([job_title, count]) => ({ job_title, count }))
+    .sort((a, b) => d3.descending(a.count, b.count))
+    .slice(0, 10); // 只取前十筆
+
+  // 初始化job title篩選選項
   const jobs = Array.from(new Set(data.map((d) => d.job_title)));
   const jobFilter = d3.select("#jobFilter");
   jobs.forEach((job) => {
+    const checked = jobCounts.some(j => j.job_title === job) ? 'checked' : '';
     jobFilter
       .append("div")
       .attr("class", "job-checkbox")
       .append("label")
       .html(
-        `<input type="checkbox" value="${job}" checked onchange="updateChart()"> ${job}`
+        `<input type="checkbox" value="${job}" ${checked} onchange="updateChart()"> ${job}`
       );
-  });
+  }); //0526更新
+
   // 餅圖設置
   const pieMargin = { top: 20, right: 30, bottom: 40, left: 40 },
     pieWidth = 350 - pieMargin.left - pieMargin.right,
@@ -195,8 +219,7 @@ d3.csv("ds_salaries.csv").then((data) => {
     .append("g")
     .attr(
       "transform",
-      `translate(${pieWidth / 2 + pieMargin.left},${
-        pieHeight / 2 + pieMargin.top
+      `translate(${pieWidth / 2 + pieMargin.left},${pieHeight / 2 + pieMargin.top
       })`
     );
 
@@ -208,8 +231,7 @@ d3.csv("ds_salaries.csv").then((data) => {
     .append("g")
     .attr(
       "transform",
-      `translate(${pieWidth / 2 + pieMargin.left},${
-        pieHeight / 2 + pieMargin.top
+      `translate(${pieWidth / 2 + pieMargin.left},${pieHeight / 2 + pieMargin.top
       })`
     );
 
@@ -375,8 +397,39 @@ d3.csv("ds_salaries.csv").then((data) => {
         selectedJobs.includes(d.job_title)
     );
 
-    x.domain(displayData.map((d) => d.job_title));
-    y.domain([0, d3.max(displayData, (d) => d.salary_in_usd)]);
+    // 計算每個工作標題的數量
+    /*const jobCounts = Array.from(d3.rollup(
+      displayData,
+      v => v.length,
+      d => d.job_title
+      ), ([job_title, count]) => ({ job_title, count }))
+      .sort((a, b) => d3.descending(a.count, b.count))
+      .slice(0, 10); // 只取前十筆
+
+    // 過濾顯示數據，只保留前十個工作標題的數據
+    const filteredDisplayData = displayData.filter(d => jobCounts.map(j => j.job_title).includes(d.job_title));
+    */
+    const jobCounts = Array.from(d3.rollup(
+      displayData,
+      v => v.length,
+      d => d.job_title
+    ), ([job_title, count]) => ({ job_title, count }))
+      .sort((a, b) => d3.descending(a.count, b.count))
+    //.slice(0, 10); // 只取前十筆0528註解此行
+
+  // 確保選擇的 job_titles 也包含在前十名中
+  const selectedJobCounts = jobCounts.filter(j => selectedJobs.includes(j.job_title));
+  const remainingSlots = Math.max(10 - selectedJobCounts.length, 0);
+  const topJobCounts = jobCounts.filter(j => !selectedJobs.includes(j.job_title)).slice(0, remainingSlots);
+  const finalJobCounts = selectedJobCounts.concat(topJobCounts);
+
+  // 過濾顯示數據，只保留最終選中的前十個工作標題的數據
+  const filteredDisplayData = displayData.filter(d => finalJobCounts.map(j => j.job_title).includes(d.job_title));
+   
+    //0526更新   
+
+    x.domain(finalJobCounts.map((d) => d.job_title));
+    y.domain([0, d3.max(filteredDisplayData, (d) => d.salary_in_usd)]);
 
     xAxis
       .call(d3.axisBottom(x))
@@ -386,7 +439,7 @@ d3.csv("ds_salaries.csv").then((data) => {
 
     yAxis.call(d3.axisLeft(y));
 
-    const bars = svg.selectAll(".bar").data(displayData);
+    const bars = svg.selectAll(".bar").data(filteredDisplayData);
 
     bars
       .enter()
@@ -395,7 +448,7 @@ d3.csv("ds_salaries.csv").then((data) => {
       .attr("x", (d) => x(d.job_title))
       .attr("width", x.bandwidth())
       .attr("y", (d) => y(d.salary_in_usd))
-      .attr("height", (d) => height - y(d.salary_in_usd));
+      .attr("height", (d) => height - y(d.salary_in_usd))
 
     bars
       .attr("x", (d) => x(d.job_title))
@@ -404,13 +457,83 @@ d3.csv("ds_salaries.csv").then((data) => {
       .attr("height", (d) => height - y(d.salary_in_usd));
 
     bars.exit().remove();
+    /*
+     // 更新圖例
+     const legend2 = svg.selectAll(".legend-item").data(jobCounts);
+
+     const legendEnter2 = legend2.enter().append("g").attr("class", "legend-item");
+ 
+     legendEnter2
+         .append("rect")
+         .attr("x", width + 20)
+         .attr("width", 18)
+         .attr("height", 18)
+         .style("fill", (d, i) => d3.schemeCategory10[i % 10]);
+ 
+     legendEnter2
+         .append("text")
+         .attr("x", width + 45)
+         .attr("y", 9)
+         .attr("dy", ".35em")
+         .style("text-anchor", "start")
+         .text((d) => d.job_title);
+ 
+     legend2
+         .merge(legendEnter2)
+         .attr("transform", (d, i) => `translate(0, ${i * 20})`)
+         .select("rect")
+         .style("fill", (d, i) => d3.schemeCategory10[i % 10]);
+ 
+     legend2
+         .select("text")
+         .text((d) => d.job_title);
+ 
+     legend2.exit().remove();
+*/
+    // 更新圖例
+    svg.selectAll(".legend-item").remove();
+
+    const legend3 = svg.selectAll(".legend-item").data(finalJobCounts, d => d.job_title);
+
+    //legend3.exit().remove(); // 移除不再存在的圖例項
+
+    const legendEnter3 = legend3.enter().append("g").attr("class", "legend-item");
+
+    legendEnter3
+      .append("rect")
+      .attr("x", width + 20)
+      .attr("width", 18)
+      .attr("height", 18)
+      .style("fill", (d, i) => d3.schemeCategory10[i % 10]);
+
+    legendEnter3
+      .append("text")
+      .attr("x", width + 45)
+      .attr("y", 9)
+      .attr("dy", ".35em")
+      .style("text-anchor", "start")
+      .text((d) => d.job_title);
+
+    legend3
+      .merge(legendEnter3)
+      .attr("transform", (d, i) => `translate(0, ${i * 20})`)
+      .select("rect")
+      .style("fill", (d, i) => d3.schemeCategory10[i % 10]);
+
+    legend3
+      .merge(legendEnter3)
+      .select("text")
+      .text((d) => d.job_title);
+
+    //legend3.exit().remove();
+    //0526更新
 
     // 更新地理圖
-    updateWorldMap(displayData);
+    updateWorldMap(filteredDisplayData);
 
     // 更新堆積面積圖
     const nestedData = d3
-      .groups(displayData, (d) => d.work_year)
+      .groups(filteredDisplayData, (d) => d.work_year)
       .map(([key, values]) => {
         const jobData = { work_year: key };
         values.forEach((d) => {
@@ -419,10 +542,12 @@ d3.csv("ds_salaries.csv").then((data) => {
         return jobData;
       });
 
-    const keys = Array.from(new Set(displayData.map((d) => d.job_title)));
+    /*const keys = Array.from(new Set(displayData.map((d) => d.job_title)));
+    const stack = d3.stack().keys(keys);*/
+    const keys = finalJobCounts.map(d => d.job_title);
     const stack = d3.stack().keys(keys);
 
-    lineX.domain(d3.extent(displayData, (d) => d.work_year));
+    lineX.domain(d3.extent(filteredDisplayData, (d) => d.work_year));
     lineY.domain([
       0,
       d3.max(nestedData, (d) =>
@@ -470,6 +595,8 @@ d3.csv("ds_salaries.csv").then((data) => {
     // 添加堆積面積圖圖例
     const legend = lineSvg.selectAll(".legend").data(keys, (d) => d);
 
+    legend.exit().remove(); // 移除不再存在的圖例項  
+
     const legendEnter = legend
       .enter()
       .append("g")
@@ -494,10 +621,10 @@ d3.csv("ds_salaries.csv").then((data) => {
     legend.exit().remove();
 
     // 更新散佈圖
-    updateScatterPlot(displayData);
+    updateScatterPlot(filteredDisplayData);
 
     // 更新圓餅圖
-    updatePieCharts(displayData);
+    updatePieCharts(filteredDisplayData);
   }
   // 定義更新圓餅圖的函數
   function updatePieCharts(data) {
@@ -736,7 +863,7 @@ d3.csv("ds_salaries.csv").then((data) => {
         .append("text")
         .attr("x", legendWidth - 20)
         .attr("y", 30)
-        .text(d3.max(Array.from(locationCount.values())));
+      // .text(d3.max(Array.from(locationCount.values())));
 
       legendSvg
         .append("text")
@@ -760,6 +887,8 @@ d3.csv("ds_salaries.csv").then((data) => {
         );
     });
   }
+
+  
 
   // 使 updateChart 和 updateScatterPlot 函數在全局範圍內可訪問
   window.updateChart = () => {
@@ -796,9 +925,8 @@ d3.csv("ds_salaries.csv").then((data) => {
     let html = `<strong>${year}年</strong><br/>`;
     Object.keys(data).forEach((key) => {
       if (key !== "work_year") {
-        html += `<span style="color:${color(key)}">${key}</span>: ${
-          data[key]
-        }<br/>`;
+        html += `<span style="color:${color(key)}">${key}</span>: ${data[key]
+          }<br/>`;
       }
     });
     return html;
