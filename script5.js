@@ -11,6 +11,28 @@ function toggleMenu() {
   }
 }
 
+const fixedColors = {
+  MI: "#1f77b4",
+  SE: "#ff7f0e",
+  EN: "#2ca02c",
+  EX: "#d62728",
+  L: "#1f77b4",
+  S: "#ff7f0e",
+  M: "#2ca02c",
+  FT: "#1f77b4",
+  CT: "#ff7f0e",
+  PT: "#2ca02c",
+  FL: "#d62728",
+  0: "#1f77b4",
+  50: "#ff7f0e",
+  100: "#2ca02c",
+};
+
+const pieColor = d3
+  .scaleOrdinal()
+  .domain(Object.keys(fixedColors))
+  .range(Object.values(fixedColors));
+
 // 初始化長條圖和篩選選項
 const margin = { top: 20, right: 30, bottom: 40, left: 40 },
   width = 960 - margin.left - margin.right,
@@ -391,7 +413,7 @@ d3.csv("ds_salaries.csv").then((data) => {
     .append("rect")
     .attr("width", 18)
     .attr("height", 18)
-    .style("fill", pieColor2);
+    .style("fill", pieColor);
 
   legendItem2
     .append("text")
@@ -464,7 +486,7 @@ d3.csv("ds_salaries.csv").then((data) => {
     .append("rect")
     .attr("width", 18)
     .attr("height", 18)
-    .style("fill", pieColor3);
+    .style("fill", pieColor);
 
   legendItem3
     .append("text")
@@ -537,7 +559,7 @@ d3.csv("ds_salaries.csv").then((data) => {
     .append("rect")
     .attr("width", 18)
     .attr("height", 18)
-    .style("fill", pieColor4);
+    .style("fill", pieColor);
 
   legendItem4
     .append("text")
@@ -745,11 +767,6 @@ d3.csv("ds_salaries.csv").then((data) => {
       .outerRadius(pieRadius - 10)
       .innerRadius(pieRadius - 90);
 
-    const pieColor = d3
-      .scaleOrdinal()
-      .domain(experienceLevelData.map((d) => d.key))
-      .range(d3.schemeCategory10);
-
     const g = pieSvg.selectAll(".arc").data(pie(experienceLevelData));
 
     g.enter()
@@ -795,11 +812,6 @@ d3.csv("ds_salaries.csv").then((data) => {
       .outerRadius(pieRadius - 10)
       .innerRadius(pieRadius - 90);
 
-    const pieColor2 = d3
-      .scaleOrdinal()
-      .domain(companySizeData.map((d) => d.key))
-      .range(d3.schemeCategory10);
-
     const g2 = pieSvg2.selectAll(".arc").data(pie2(companySizeData));
 
     g2.enter()
@@ -807,10 +819,10 @@ d3.csv("ds_salaries.csv").then((data) => {
       .attr("class", "arc")
       .append("path")
       .attr("d", arc2)
-      .style("fill", (d) => pieColor2(d.data.key))
+      .style("fill", (d) => pieColor(d.data.key))
       .merge(g2.select("path"))
       .attr("d", arc2)
-      .style("fill", (d) => pieColor2(d.data.key));
+      .style("fill", (d) => pieColor(d.data.key));
 
     g2.select("text")
       .attr("transform", (d) => `translate(${arc2.centroid(d)})`)
@@ -845,11 +857,6 @@ d3.csv("ds_salaries.csv").then((data) => {
       .outerRadius(pieRadius - 10)
       .innerRadius(pieRadius - 90);
 
-    const pieColor3 = d3
-      .scaleOrdinal()
-      .domain(employeetypeData.map((d) => d.key))
-      .range(d3.schemeCategory10);
-
     const g3 = pieSvg3.selectAll(".arc").data(pie3(employeetypeData));
 
     g3.enter()
@@ -857,10 +864,10 @@ d3.csv("ds_salaries.csv").then((data) => {
       .attr("class", "arc")
       .append("path")
       .attr("d", arc3)
-      .style("fill", (d) => pieColor3(d.data.key))
+      .style("fill", (d) => pieColor(d.data.key))
       .merge(g3.select("path"))
       .attr("d", arc3)
-      .style("fill", (d) => pieColor3(d.data.key));
+      .style("fill", (d) => pieColor(d.data.key));
 
     g3.select("text")
       .attr("transform", (d) => `translate(${arc3.centroid(d)})`)
@@ -895,11 +902,6 @@ d3.csv("ds_salaries.csv").then((data) => {
       .outerRadius(pieRadius - 10)
       .innerRadius(pieRadius - 90);
 
-    const pieColor4 = d3
-      .scaleOrdinal()
-      .domain(remoteratioData.map((d) => d.key))
-      .range(d3.schemeCategory10);
-
     const g4 = pieSvg4.selectAll(".arc").data(pie4(remoteratioData));
 
     g4.enter()
@@ -907,10 +909,10 @@ d3.csv("ds_salaries.csv").then((data) => {
       .attr("class", "arc")
       .append("path")
       .attr("d", arc4)
-      .style("fill", (d) => pieColor4(d.data.key))
+      .style("fill", (d) => pieColor(d.data.key))
       .merge(g4.select("path"))
       .attr("d", arc4)
-      .style("fill", (d) => pieColor4(d.data.key));
+      .style("fill", (d) => pieColor(d.data.key));
 
     g4.select("text")
       .attr("transform", (d) => `translate(${arc4.centroid(d)})`)
