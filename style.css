@@ -81,6 +81,12 @@ a:hover {
 .main-content {
   margin-top: 50px; /* 調整以符合 header 高度 */
 }
+.worldmap_content {
+  align-content: center;
+  justify-content: center;
+  padding-left: 300px;
+  padding-top: 50px;
+}
 .middle_div {
   display: flex;
   padding-left: 100px;
@@ -126,3 +132,17 @@ a:hover {
   pointer-events: none;
 }
 
+#barchart {
+  display: flex;
+  padding-top: 60px;
+  padding-left: 250px;
+  align-content: center;
+  justify-content: center;
+}
+
+#lineChart {
+  display: flex;
+  padding-top: 60px;
+  padding-top: 200px;
+  padding-left: 100px;
+}
