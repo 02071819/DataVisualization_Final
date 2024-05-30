@@ -1,89 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Data Visualization Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-  <script src="https://d3js.org/d3.v6.min.js"></script>
-  <script src="https://unpkg.com/topojson@3"></script>
-</head>
-<body>
-  <!-- 篩選選項 -->
-  <div class="header">
-    <div class="hamburger-menu" id="hamburgerMenu" onclick="toggleMenu()">
-      &#9776; <!-- Hamburger icon -->
-    </div>
-    <div class="year_filter">
-      <label for="yearFilter">Work Year :</label>
-      <select id="yearFilter" onchange="updateChart()">
-        <option value="all">All</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="sidebar" id="sidebar">
-    <!-- 職位篩選選項 -->
-    <div class="job_filter">
-      <label for="jobFilter">Job Titles:</label>
-      <div id="jobFilter"></div>
-    </div>
-  </div>
-
-  <div class="main-content">
-    <div class="top_div">
-      <div>
-        <!-- 地理圖容器 -->
-        <div id="worldMap"></div>
-
-        <!-- 地理圖圖例容器 -->
-        <div id="legendContainer"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Visualization Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=" />
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="https://unpkg.com/topojson@3"></script>
+  </head>
+  <body>
+    <!-- 篩選選項 -->
+    <div class="header">
+      <div class="hamburger-menu" id="hamburgerMenu" onclick="toggleMenu()">
+        &#9776;
+        <!-- Hamburger icon -->
       </div>
-      <div class="middle_pie">
-        <!-- 圓餅圖容器 -->
-        <div id="pieChart"></div>
+      <div class="year_filter">
+        <label for="yearFilter">Work Year :</label>
+        <select id="yearFilter" onchange="updateChart()">
+          <option value="all">All</option>
+        </select>
+      </div>
 
-        <!-- 圓餅圖容器2 -->
-        <div id="pieChart2"></div>
+      <a href="./index5.html">WorldMap Chart</a>
+      <a href="./index1.html">Pie Chart</a>
+      <a href="./index2.html">Bar Chart</a>
+      <a href="./index3.html">Stacked Area Chart</a>
+      <a href="./index4.html">Scatterplot Chart</a>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+      <!-- 職位篩選選項 -->
+      <div class="job_filter">
+        <label for="jobFilter">Job Titles:</label>
+        <div id="jobFilter"></div>
       </div>
     </div>
 
-    <div class="middle_div">
-      <!-- 長條圖容器 -->
-      <div id="chart"></div>
-    </div>
+    <div class="main-content">
+      <div class="top_div">
+        <div>
+          <!-- 地理圖容器 -->
+          <div id="worldMap"></div>
 
-    <div class="end_div">
-      <!-- 折線面積圖容器 -->
-      <div id="lineChart"></div>
-
-      <!-- 散佈圖下拉選單 -->
-      <div class="scatterplot_part">
-        <div class="scatterplot_control">
-          <label for="xAxisSelect">X-Axis:</label>
-          <select id="xAxisSelect" onchange="updateScatterPlot()">
-            <option value="remote_ratio">Remote Ratio</option>
-            <option value="salary_in_usd">Salary in USD</option>
-            <option value="work_year">Work Year</option>
-          </select>
-
-          <label for="yAxisSelect">Y-Axis:</label>
-          <select id="yAxisSelect" onchange="updateScatterPlot()">
-            <option value="salary_in_usd">Salary in USD</option>
-            <option value="remote_ratio">Remote Ratio</option>
-            <option value="work_year">Work Year</option>
-          </select>
+          <!-- 地理圖圖例容器 -->
+          <div id="legendContainer"></div>
         </div>
-        <!-- 散佈圖容器 -->
-        <div id="scatterPlot"></div>
       </div>
+      <select id="xAxisSelect" onchange="updateScatterPlot()"></select>
+
+      <select id="yAxisSelect" onchange="updateScatterPlot()"></select>
     </div>
-  </div>
 
-  <!-- Tooltip -->
-  <div class="tooltip" style="opacity: 0"></div>
+    <!-- Tooltip -->
+    <div class="tooltip" style="opacity: 0"></div>
 
-  <script src="script5.js"></script>
-</body>
+    <script src="script5.js"></script>
+  </body>
 </html>

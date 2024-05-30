@@ -626,6 +626,7 @@ d3.csv("ds_salaries.csv").then((data) => {
     // 更新圓餅圖
     updatePieCharts(filteredDisplayData);
   }
+
   // 定義更新圓餅圖的函數
   function updatePieCharts(data) {
     // 更新第一個圓餅圖
@@ -889,7 +890,6 @@ d3.csv("ds_salaries.csv").then((data) => {
   }
 
   
-
   // 使 updateChart 和 updateScatterPlot 函數在全局範圍內可訪問
   window.updateChart = () => {
     const selectedYear = d3.select("#yearFilter").property("value");

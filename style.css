@@ -92,10 +92,20 @@ svg {
 .year_filter {
   display: flex;
   align-items: center;
-  flex-grow: 1;
+  padding: 20px;
 }
 .year_filter label {
   padding: 10px;
+}
+a {
+  padding: 10px;
+  text-decoration: none;
+  color: #000000;
+  cursor: pointer;
+  font-weight: bold;
+}
+a:hover {
+  color: #002198;
 }
 /* Sidebar styles */
 .sidebar {

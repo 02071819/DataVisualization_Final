@@ -39,15 +39,20 @@
     </div>
 
     <div class="main-content">
-      <div class="middle_div">
-        <!-- 長條圖容器 -->
-        <div id="chart"></div>
+      <div class="top_div">
+        <div class="middle_pie">
+          <!-- 圓餅圖容器 -->
+          <div id="pieChart"></div>
+
+          <!-- 圓餅圖容器2 -->
+          <div id="pieChart2"></div>
+        </div>
       </div>
+
+      <select id="xAxisSelect" onchange="updateScatterPlot()"></select>
+
+      <select id="yAxisSelect" onchange="updateScatterPlot()"></select>
     </div>
-
-    <select id="xAxisSelect" onchange="updateScatterPlot()"></select>
-
-    <select id="yAxisSelect" onchange="updateScatterPlot()"></select>
 
     <!-- Tooltip -->
     <div class="tooltip" style="opacity: 0"></div>
