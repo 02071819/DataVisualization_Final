@@ -12,51 +12,6 @@ svg {
     margin: 20px;
   }
   
-  .uiPanel {
-    height:150px;
-    width: 150px;
-    float: left;
-  }
-
-  .radioPanel{
-    font-size: 14px;
-    float: left;
-  }
-
-  input, button {
-    padding: 5px;
-    border-radius: 3px;
-    margin: 5px 2px;
-  }
-
-  input {
-    height: 14px;
-    width: 85px;
-  }
-
-  button {
-    background: #B3E5FC;
-    color: black;
-    border: 0;
-    outline: none;
-    height: 30px;
-    width: 110px;
-  }
-  
-  select{
-    font-size: 16px;
-  }
-  #xAxis{
-    font-size: 16px;
-  }
-  
-  #yAxis{
-    font-size: 16px;
-  }
-
-  #barchart{
-    padding-left: 100px;
-  }
 
 /* 添加一些基本的樣式 */
 /* Header styles */
@@ -83,9 +38,7 @@ svg {
 .bar {
   fill: steelblue;
 }
-.bar:hover {
-  fill: orange;
-}
+
 .axis-label {
   font-size: 12px;
 }
@@ -128,14 +81,14 @@ a:hover {
 .main-content {
   margin-top: 50px; /* 調整以符合 header 高度 */
 }
-
-.top_div {
-  display: flex;
-  padding-left: 50px;
-}
 .middle_div {
   display: flex;
   padding-left: 100px;
+}
+.pie_content {
+  display: flex;
+  padding-top: 150px;
+  align-content: center;
 }
 .end_div {
   padding-left: 60px;

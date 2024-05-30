@@ -11,13 +11,13 @@ function toggleMenu() {
   }
 }
 
-// 初始化圖表和篩選選項
+// 初始化長條圖和篩選選項
 const margin = { top: 20, right: 30, bottom: 40, left: 40 },
   width = 960 - margin.left - margin.right,
   height = 500 - margin.top - margin.bottom;
 
 const svg = d3
-  .select("#chart")
+  .select("#barchart")
   .append("svg")
   .attr("width", width + margin.left + margin.right)
   .attr("height", height + margin.top + margin.bottom)
@@ -97,7 +97,7 @@ const path = d3.geoPath().projection(projection);
 
 const colorScale = d3.scaleSequential(d3.interpolateGreens);
 
-// 初始化折線面積圖
+// 初始化堆疊面積圖
 const lineMargin = { top: 20, right: 30, bottom: 40, left: 40 },
   lineWidth = 1160 - lineMargin.left - lineMargin.right,
   lineHeight = 300 - lineMargin.top - lineMargin.bottom;
@@ -120,7 +120,7 @@ const lineXAxis = lineSvg
 
 const lineYAxis = lineSvg.append("g").attr("class", "axis-label");
 
-const color = d3.scaleOrdinal(d3.schemeCategory10);
+const color = d3.scaleOrdinal(d3.schemePastel1);
 
 const area = d3
   .area()
@@ -169,25 +169,16 @@ d3.csv("ds_salaries.csv").then((data) => {
   years.forEach((year) => {
     yearFilter.append("option").attr("value", year).text(year);
   });
-  /*
-    const jobs = Array.from(new Set(data.map((d) => d.job_title)));
-    const jobFilter = d3.select("#jobFilter");
-    jobs.forEach((job) => {
-      jobFilter
-        .append("div")
-        .attr("class", "job-checkbox")
-        .append("label")
-        .html(
-          `<input type="checkbox" value="${job}" checked onchange="updateChart()"> ${job}`
-        );
-    });*/
 
   // 計算每個工作標題的數量
-  const jobCounts = Array.from(d3.rollup(
-    data,
-    v => v.length,
-    d => d.job_title
-  ), ([job_title, count]) => ({ job_title, count }))
+  const jobCounts = Array.from(
+    d3.rollup(
+      data,
+      (v) => v.length,
+      (d) => d.job_title
+    ),
+    ([job_title, count]) => ({ job_title, count })
+  )
     .sort((a, b) => d3.descending(a.count, b.count))
     .slice(0, 10); // 只取前十筆
 
@@ -195,7 +186,7 @@ d3.csv("ds_salaries.csv").then((data) => {
   const jobs = Array.from(new Set(data.map((d) => d.job_title)));
   const jobFilter = d3.select("#jobFilter");
   jobs.forEach((job) => {
-    const checked = jobCounts.some(j => j.job_title === job) ? 'checked' : '';
+    const checked = jobCounts.some((j) => j.job_title === job) ? "checked" : "";
     jobFilter
       .append("div")
       .attr("class", "job-checkbox")
@@ -203,9 +194,9 @@ d3.csv("ds_salaries.csv").then((data) => {
       .html(
         `<input type="checkbox" value="${job}" ${checked} onchange="updateChart()"> ${job}`
       );
-  }); //0526更新
+  });
 
-  // 餅圖設置
+  // 圓餅圖設置
   const pieMargin = { top: 20, right: 30, bottom: 40, left: 40 },
     pieWidth = 350 - pieMargin.left - pieMargin.right,
     pieHeight = 350 - pieMargin.top - pieMargin.bottom,
@@ -219,7 +210,8 @@ d3.csv("ds_salaries.csv").then((data) => {
     .append("g")
     .attr(
       "transform",
-      `translate(${pieWidth / 2 + pieMargin.left},${pieHeight / 2 + pieMargin.top
+      `translate(${pieWidth / 2 + pieMargin.left},${
+        pieHeight / 2 + pieMargin.top
       })`
     );
 
@@ -231,7 +223,34 @@ d3.csv("ds_salaries.csv").then((data) => {
     .append("g")
     .attr(
       "transform",
-      `translate(${pieWidth / 2 + pieMargin.left},${pieHeight / 2 + pieMargin.top
+      `translate(${pieWidth / 2 + pieMargin.left},${
+        pieHeight / 2 + pieMargin.top
+      })`
+    );
+
+  const pieSvg3 = d3
+    .select("#pieChart3")
+    .append("svg")
+    .attr("width", pieWidth + pieMargin.left + pieMargin.right)
+    .attr("height", pieHeight + pieMargin.top + pieMargin.bottom)
+    .append("g")
+    .attr(
+      "transform",
+      `translate(${pieWidth / 2 + pieMargin.left},${
+        pieHeight / 2 + pieMargin.top
+      })`
+    );
+
+  const pieSvg4 = d3
+    .select("#pieChart4")
+    .append("svg")
+    .attr("width", pieWidth + pieMargin.left + pieMargin.right)
+    .attr("height", pieHeight + pieMargin.top + pieMargin.bottom)
+    .append("g")
+    .attr(
+      "transform",
+      `translate(${pieWidth / 2 + pieMargin.left},${
+        pieHeight / 2 + pieMargin.top
       })`
     );
 
@@ -381,6 +400,152 @@ d3.csv("ds_salaries.csv").then((data) => {
     .attr("dy", ".35em")
     .text((d) => d);
 
+  // 處理並繪製第三個圓餅圖
+  const employeetypeData = Array.from(
+    d3.rollup(
+      data,
+      (v) => v.length,
+      (d) => d.employment_type
+    ),
+    ([key, value]) => ({ key, value })
+  );
+
+  const pie3 = d3.pie().value((d) => d.value);
+
+  const arc3 = d3
+    .arc()
+    .outerRadius(pieRadius - 10)
+    .innerRadius(pieRadius - 90);
+
+  const pieColor3 = d3
+    .scaleOrdinal()
+    .domain(employeetypeData.map((d) => d.key))
+    .range(d3.schemeCategory10);
+
+  const g3 = pieSvg3
+    .selectAll(".arc")
+    .data(pie3(employeetypeData))
+    .enter()
+    .append("g")
+    .attr("class", "arc");
+
+  g3.append("path")
+    .attr("d", arc3)
+    .style("fill", (d) => pieColor3(d.data.key));
+
+  g3.append("text")
+    .attr("transform", (d) => `translate(${arc3.centroid(d)})`)
+    .attr("dy", ".35em")
+    .style("font-size", "15px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "700")
+    .text(
+      (d) =>
+        `${d.data.key}: ${(
+          (d.data.value / d3.sum(companysizeData.map((dd) => dd.value))) *
+          100
+        ).toFixed(1)}%`
+    );
+
+  // 添加第三個圓餅圖的圖例
+  const legend3 = pieSvg3
+    .append("g")
+    .attr("transform", `translate(${pieWidth / 2},${-pieHeight / 2 + 20})`);
+
+  const legendItem3 = legend3
+    .selectAll(".legend-item")
+    .data(pieColor3.domain())
+    .enter()
+    .append("g")
+    .attr("class", "legend-item")
+    .attr("transform", (d, i) => `translate(0, ${i * 20})`);
+
+  legendItem3
+    .append("rect")
+    .attr("width", 18)
+    .attr("height", 18)
+    .style("fill", pieColor3);
+
+  legendItem3
+    .append("text")
+    .attr("x", 24)
+    .attr("y", 9)
+    .attr("dy", ".35em")
+    .text((d) => d);
+
+  // 處理並繪製第四個圓餅圖
+  const remoteratioData = Array.from(
+    d3.rollup(
+      data,
+      (v) => v.length,
+      (d) => d.remote_ratio
+    ),
+    ([key, value]) => ({ key, value })
+  );
+
+  const pie4 = d3.pie().value((d) => d.value);
+
+  const arc4 = d3
+    .arc()
+    .outerRadius(pieRadius - 10)
+    .innerRadius(pieRadius - 90);
+
+  const pieColor4 = d3
+    .scaleOrdinal()
+    .domain(remoteratioData.map((d) => d.key))
+    .range(d3.schemeCategory10);
+
+  const g4 = pieSvg4
+    .selectAll(".arc")
+    .data(pie4(remoteratioData))
+    .enter()
+    .append("g")
+    .attr("class", "arc");
+
+  g4.append("path")
+    .attr("d", arc4)
+    .style("fill", (d) => pieColor4(d.data.key));
+
+  g4.append("text")
+    .attr("transform", (d) => `translate(${arc4.centroid(d)})`)
+    .attr("dy", ".35em")
+    .style("font-size", "15px")
+    .style("text-anchor", "middle")
+    .style("font-weight", "700")
+    .text(
+      (d) =>
+        `${d.data.key}: ${(
+          (d.data.value / d3.sum(remoteratioData.map((dd) => dd.value))) *
+          100
+        ).toFixed(1)}%`
+    );
+
+  // 添加第四個圓餅圖的圖例
+  const legend4 = pieSvg4
+    .append("g")
+    .attr("transform", `translate(${pieWidth / 2},${-pieHeight / 2 + 20})`);
+
+  const legendItem4 = legend4
+    .selectAll(".legend-item")
+    .data(pieColor4.domain())
+    .enter()
+    .append("g")
+    .attr("class", "legend-item")
+    .attr("transform", (d, i) => `translate(0, ${i * 20})`);
+
+  legendItem4
+    .append("rect")
+    .attr("width", 18)
+    .attr("height", 18)
+    .style("fill", pieColor4);
+
+  legendItem4
+    .append("text")
+    .attr("x", 24)
+    .attr("y", 9)
+    .attr("dy", ".35em")
+    .text((d) => d);
+
   // 初始顯示所有資料
   updateChart(data);
 
@@ -409,24 +574,30 @@ d3.csv("ds_salaries.csv").then((data) => {
     // 過濾顯示數據，只保留前十個工作標題的數據
     const filteredDisplayData = displayData.filter(d => jobCounts.map(j => j.job_title).includes(d.job_title));
     */
-    const jobCounts = Array.from(d3.rollup(
-      displayData,
-      v => v.length,
-      d => d.job_title
-    ), ([job_title, count]) => ({ job_title, count }))
-      .sort((a, b) => d3.descending(a.count, b.count))
+    const jobCounts = Array.from(
+      d3.rollup(
+        displayData,
+        (v) => v.length,
+        (d) => d.job_title
+      ),
+      ([job_title, count]) => ({ job_title, count })
+    ).sort((a, b) => d3.descending(a.count, b.count));
     //.slice(0, 10); // 只取前十筆0528註解此行
 
-  // 確保選擇的 job_titles 也包含在前十名中
-  const selectedJobCounts = jobCounts.filter(j => selectedJobs.includes(j.job_title));
-  const remainingSlots = Math.max(10 - selectedJobCounts.length, 0);
-  const topJobCounts = jobCounts.filter(j => !selectedJobs.includes(j.job_title)).slice(0, remainingSlots);
-  const finalJobCounts = selectedJobCounts.concat(topJobCounts);
+    // 確保選擇的 job_titles 也包含在前十名中
+    const selectedJobCounts = jobCounts.filter((j) =>
+      selectedJobs.includes(j.job_title)
+    );
+    const remainingSlots = Math.max(10 - selectedJobCounts.length, 0);
+    const topJobCounts = jobCounts
+      .filter((j) => !selectedJobs.includes(j.job_title))
+      .slice(0, remainingSlots);
+    const finalJobCounts = selectedJobCounts.concat(topJobCounts);
 
-  // 過濾顯示數據，只保留最終選中的前十個工作標題的數據
-  const filteredDisplayData = displayData.filter(d => finalJobCounts.map(j => j.job_title).includes(d.job_title));
-   
-    //0526更新   
+    // 過濾顯示數據，只保留最終選中的前十個工作標題的數據
+    const filteredDisplayData = displayData.filter((d) =>
+      finalJobCounts.map((j) => j.job_title).includes(d.job_title)
+    );
 
     x.domain(finalJobCounts.map((d) => d.job_title));
     y.domain([0, d3.max(filteredDisplayData, (d) => d.salary_in_usd)]);
@@ -448,7 +619,7 @@ d3.csv("ds_salaries.csv").then((data) => {
       .attr("x", (d) => x(d.job_title))
       .attr("width", x.bandwidth())
       .attr("y", (d) => y(d.salary_in_usd))
-      .attr("height", (d) => height - y(d.salary_in_usd))
+      .attr("height", (d) => height - y(d.salary_in_usd));
 
     bars
       .attr("x", (d) => x(d.job_title))
@@ -457,76 +628,6 @@ d3.csv("ds_salaries.csv").then((data) => {
       .attr("height", (d) => height - y(d.salary_in_usd));
 
     bars.exit().remove();
-    /*
-     // 更新圖例
-     const legend2 = svg.selectAll(".legend-item").data(jobCounts);
-
-     const legendEnter2 = legend2.enter().append("g").attr("class", "legend-item");
- 
-     legendEnter2
-         .append("rect")
-         .attr("x", width + 20)
-         .attr("width", 18)
-         .attr("height", 18)
-         .style("fill", (d, i) => d3.schemeCategory10[i % 10]);
- 
-     legendEnter2
-         .append("text")
-         .attr("x", width + 45)
-         .attr("y", 9)
-         .attr("dy", ".35em")
-         .style("text-anchor", "start")
-         .text((d) => d.job_title);
- 
-     legend2
-         .merge(legendEnter2)
-         .attr("transform", (d, i) => `translate(0, ${i * 20})`)
-         .select("rect")
-         .style("fill", (d, i) => d3.schemeCategory10[i % 10]);
- 
-     legend2
-         .select("text")
-         .text((d) => d.job_title);
- 
-     legend2.exit().remove();
-*/
-    // 更新圖例
-    svg.selectAll(".legend-item").remove();
-
-    const legend3 = svg.selectAll(".legend-item").data(finalJobCounts, d => d.job_title);
-
-    //legend3.exit().remove(); // 移除不再存在的圖例項
-
-    const legendEnter3 = legend3.enter().append("g").attr("class", "legend-item");
-
-    legendEnter3
-      .append("rect")
-      .attr("x", width + 20)
-      .attr("width", 18)
-      .attr("height", 18)
-      .style("fill", (d, i) => d3.schemeCategory10[i % 10]);
-
-    legendEnter3
-      .append("text")
-      .attr("x", width + 45)
-      .attr("y", 9)
-      .attr("dy", ".35em")
-      .style("text-anchor", "start")
-      .text((d) => d.job_title);
-
-    legend3
-      .merge(legendEnter3)
-      .attr("transform", (d, i) => `translate(0, ${i * 20})`)
-      .select("rect")
-      .style("fill", (d, i) => d3.schemeCategory10[i % 10]);
-
-    legend3
-      .merge(legendEnter3)
-      .select("text")
-      .text((d) => d.job_title);
-
-    //legend3.exit().remove();
-    //0526更新
 
     // 更新地理圖
     updateWorldMap(filteredDisplayData);
@@ -544,7 +645,7 @@ d3.csv("ds_salaries.csv").then((data) => {
 
     /*const keys = Array.from(new Set(displayData.map((d) => d.job_title)));
     const stack = d3.stack().keys(keys);*/
-    const keys = finalJobCounts.map(d => d.job_title);
+    const keys = finalJobCounts.map((d) => d.job_title);
     const stack = d3.stack().keys(keys);
 
     lineX.domain(d3.extent(filteredDisplayData, (d) => d.work_year));
@@ -594,8 +695,6 @@ d3.csv("ds_salaries.csv").then((data) => {
 
     // 添加堆積面積圖圖例
     const legend = lineSvg.selectAll(".legend").data(keys, (d) => d);
-
-    legend.exit().remove(); // 移除不再存在的圖例項  
 
     const legendEnter = legend
       .enter()
@@ -728,6 +827,106 @@ d3.csv("ds_salaries.csv").then((data) => {
       );
 
     g2.exit().remove();
+
+    // 更新第三個圓餅圖
+    const employeetypeData = Array.from(
+      d3.rollup(
+        data,
+        (v) => v.length,
+        (d) => d.employment_type
+      ),
+      ([key, value]) => ({ key, value })
+    );
+
+    const pie3 = d3.pie().value((d) => d.value);
+
+    const arc3 = d3
+      .arc()
+      .outerRadius(pieRadius - 10)
+      .innerRadius(pieRadius - 90);
+
+    const pieColor3 = d3
+      .scaleOrdinal()
+      .domain(employeetypeData.map((d) => d.key))
+      .range(d3.schemeCategory10);
+
+    const g3 = pieSvg3.selectAll(".arc").data(pie3(employeetypeData));
+
+    g3.enter()
+      .append("g")
+      .attr("class", "arc")
+      .append("path")
+      .attr("d", arc3)
+      .style("fill", (d) => pieColor3(d.data.key))
+      .merge(g3.select("path"))
+      .attr("d", arc3)
+      .style("fill", (d) => pieColor3(d.data.key));
+
+    g3.select("text")
+      .attr("transform", (d) => `translate(${arc3.centroid(d)})`)
+      .attr("dy", ".35em")
+      .style("font-size", "15px")
+      .style("text-anchor", "middle")
+      .style("font-weight", "700")
+      .text(
+        (d) =>
+          `${d.data.key}: ${(
+            (d.data.value / d3.sum(employeetypeData.map((dd) => dd.value))) *
+            100
+          ).toFixed(1)}%`
+      );
+
+    g3.exit().remove();
+
+    // 更新第四個圓餅圖
+    const remoteratioData = Array.from(
+      d3.rollup(
+        data,
+        (v) => v.length,
+        (d) => d.remote_ratio
+      ),
+      ([key, value]) => ({ key, value })
+    );
+
+    const pie4 = d3.pie().value((d) => d.value);
+
+    const arc4 = d3
+      .arc()
+      .outerRadius(pieRadius - 10)
+      .innerRadius(pieRadius - 90);
+
+    const pieColor4 = d3
+      .scaleOrdinal()
+      .domain(remoteratioData.map((d) => d.key))
+      .range(d3.schemeCategory10);
+
+    const g4 = pieSvg4.selectAll(".arc").data(pie4(remoteratioData));
+
+    g4.enter()
+      .append("g")
+      .attr("class", "arc")
+      .append("path")
+      .attr("d", arc4)
+      .style("fill", (d) => pieColor4(d.data.key))
+      .merge(g4.select("path"))
+      .attr("d", arc4)
+      .style("fill", (d) => pieColor4(d.data.key));
+
+    g4.select("text")
+      .attr("transform", (d) => `translate(${arc4.centroid(d)})`)
+      .attr("dy", ".35em")
+      .style("font-size", "15px")
+      .style("text-anchor", "middle")
+      .style("font-weight", "700")
+      .text(
+        (d) =>
+          `${d.data.key}: ${(
+            (d.data.value / d3.sum(remoteratioData.map((dd) => dd.value))) *
+            100
+          ).toFixed(1)}%`
+      );
+
+    g4.exit().remove();
   }
 
   function updateScatterPlot(data) {
@@ -863,7 +1062,7 @@ d3.csv("ds_salaries.csv").then((data) => {
       legendSvg
         .append("text")
         .attr("x", legendWidth - 20)
-        .attr("y", 30)
+        .attr("y", 30);
       // .text(d3.max(Array.from(locationCount.values())));
 
       legendSvg
@@ -889,7 +1088,6 @@ d3.csv("ds_salaries.csv").then((data) => {
     });
   }
 
-  
   // 使 updateChart 和 updateScatterPlot 函數在全局範圍內可訪問
   window.updateChart = () => {
     const selectedYear = d3.select("#yearFilter").property("value");
@@ -906,27 +1104,28 @@ d3.csv("ds_salaries.csv").then((data) => {
     updateChart(displayData);
   };
 
-  window.updateScatterPlot = () => {
-    const selectedYear = d3.select("#yearFilter").property("value");
-    const selectedJobs = Array.from(
-      document.querySelectorAll("#jobFilter input:checked")
-    ).map((input) => input.value);
+  // window.updateScatterPlot = () => {
+  //   const selectedYear = d3.select("#yearFilter").property("value");
+  //   const selectedJobs = Array.from(
+  //     document.querySelectorAll("#jobFilter input:checked")
+  //   ).map((input) => input.value);
 
-    const displayData = data.filter(
-      (d) =>
-        (selectedYear === "all" || d.work_year == selectedYear) &&
-        selectedJobs.includes(d.job_title)
-    );
+  //   const displayData = data.filter(
+  //     (d) =>
+  //       (selectedYear === "all" || d.work_year == selectedYear) &&
+  //       selectedJobs.includes(d.job_title)
+  //   );
 
-    updateScatterPlot(displayData);
-  };
+  //   updateScatterPlot(displayData);
+  // };
 
   function getTooltipHtml(data, year) {
     let html = `<strong>${year}年</strong><br/>`;
     Object.keys(data).forEach((key) => {
       if (key !== "work_year") {
-        html += `<span style="color:${color(key)}">${key}</span>: ${data[key]
-          }<br/>`;
+        html += `<span style="color:${color(key)}">${key}</span>: ${
+          data[key]
+        }<br/>`;
       }
     });
     return html;
