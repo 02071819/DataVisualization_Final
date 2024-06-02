@@ -677,7 +677,24 @@ d3.csv("ds_salaries.csv").then((data) => {
       .attr("x", (d) => x(d.job_title))
       .attr("width", x.bandwidth())
       .attr("y", (d) => y(d.salary_in_usd))
-      .attr("height", (d) => height - y(d.salary_in_usd));
+      .attr("height", (d) => height - y(d.salary_in_usd))
+      .on("mouseover", function (event, d) {
+        tooltip.transition().duration(200).style("opacity", 0.9);
+        tooltip
+          .html(
+            `Job: ${d.job_title}<br>Salary: $${d.salary_in_usd}<br>Year: ${d.work_year}`
+          )
+          .style("left", event.pageX + 5 + "px")
+          .style("top", event.pageY - 28 + "px");
+      })
+      .on("mousemove", function (event) {
+        tooltip
+          .style("left", event.pageX + 5 + "px")
+          .style("top", event.pageY - 28 + "px");
+      })
+      .on("mouseout", function () {
+        tooltip.transition().duration(500).style("opacity", 0);
+      });
   
     bars
       .attr("x", (d) => x(d.job_title))
@@ -695,7 +712,7 @@ d3.csv("ds_salaries.csv").then((data) => {
     updateWorldMap(filteredDisplayData);
     updateScatterPlot(filteredDisplayData);
     updatePieCharts(filteredDisplayData);
-  }
+  }  
 
   // 定義更新各種圖的函數
   function updatePieCharts(data) {
@@ -1214,7 +1231,31 @@ d3.csv("ds_salaries.csv").then((data) => {
       .style("fill", (d) => areaColor(d.key))
       .merge(areas)
       .attr("d", area)
-      .style("fill", (d) => areaColor(d.key));
+      .style("fill", (d) => areaColor(d.key))
+      .on("mouseover", function (event, d) {
+        tooltip.transition().duration(200).style("opacity", 0.9);
+        const mouse = d3.pointer(event, this);
+        const x0 = lineareaX.invert(mouse[0]);
+        const y0 = lineareaY.invert(mouse[1]);
+        const year = Math.round(x0);
+        const stackDataYear = d.find((e) => e.data.work_year === year);
+        if (stackDataYear) {
+          tooltip
+            .html(
+              `<strong>${year}</strong><br/>${d.key}: ${stackDataYear.data[d.key]}`
+            )
+            .style("left", event.pageX + 5 + "px")
+            .style("top", event.pageY - 28 + "px");
+        }
+      })
+      .on("mousemove", function (event) {
+        tooltip
+          .style("left", event.pageX + 5 + "px")
+          .style("top", event.pageY - 28 + "px");
+      })
+      .on("mouseout", function () {
+        tooltip.transition().duration(500).style("opacity", 0);
+      });
   
     areas.exit().remove();
   
@@ -1264,7 +1305,8 @@ d3.csv("ds_salaries.csv").then((data) => {
     legendItems.merge(legendEnter);
   
     legendItems.exit().remove(); // 確保刪除多餘的圖例項目
-  }
+  }  
+  
 
   // 使 updateChart 函數在全局範圍內可訪問
   window.updateChart = () => {
