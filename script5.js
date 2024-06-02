@@ -120,35 +120,52 @@ const path = d3.geoPath().projection(projection);
 const colorScale = d3.scaleSequential(d3.interpolateGreens);
 
 // 初始化堆疊面積圖
-const lineMargin = { top: 20, right: 30, bottom: 40, left: 40 },
-  lineWidth = 1160 - lineMargin.left - lineMargin.right,
-  lineHeight = 300 - lineMargin.top - lineMargin.bottom;
+const lineareaMargin = { top: 20, right: 30, bottom: 40, left: 40 },
+  lineareaWidth = 1160 - lineareaMargin.left - lineareaMargin.right,
+  lineareaHeight = 300 - lineareaMargin.top - lineareaMargin.bottom;
 
-const lineSvg = d3
-  .select("#lineChart")
+const lineareaSvg = d3
+  .select("#LineAreaChart")
   .append("svg")
-  .attr("width", lineWidth + lineMargin.left + lineMargin.right)
-  .attr("height", lineHeight + lineMargin.top + lineMargin.bottom)
-  // .append("g")
-  .attr("transform", `translate(${lineMargin.left},${lineMargin.top})`);
-
-const lineX = d3.scaleLinear().range([0, lineWidth]);
-const lineY = d3.scaleLinear().range([lineHeight, 0]);
-
-const lineXAxis = lineSvg
+  .attr("width", lineareaWidth + lineareaMargin.left + lineareaMargin.right)
+  .attr("height", lineareaHeight + lineareaMargin.top + lineareaMargin.bottom)
   .append("g")
-  .attr("transform", `translate(0,${lineHeight})`)
+  .attr("transform", `translate(${lineareaMargin.left},${lineareaMargin.top})`);
+
+// 初始化圖例的 SVG 元素
+const legendSvg = d3
+  .select("#LineAreaChart svg")
+  .append("g")
+  .attr("class", "legend")
+  .attr(
+    "transform",
+    `translate(${lineareaWidth + 30 + lineareaMargin.left},${lineareaMargin.top})`
+  );
+
+const lineareaX = d3.scaleLinear().range([0, lineareaWidth]);
+const lineareaY = d3.scaleLinear().range([lineareaHeight, 0]);
+
+const lineareaXAxis = lineareaSvg
+  .append("g")
+  .attr("transform", `translate(0,${lineareaHeight})`)
   .attr("class", "axis-label");
 
-const lineYAxis = lineSvg.append("g").attr("class", "axis-label");
+const lineareaYAxis = lineareaSvg.append("g").attr("class", "axis-label");
 
 const color = d3.scaleOrdinal(d3.schemePastel1);
+const areaColor = d3.scaleOrdinal(d3.schemePastel1);
+const lineareaColor = d3.scaleOrdinal(d3.schemeSet1);
 
 const area = d3
   .area()
-  .x((d) => lineX(d.data.work_year))
-  .y0((d) => lineY(d[0]))
-  .y1((d) => lineY(d[1]));
+  .x((d) => lineareaX(d.data.work_year))
+  .y0((d) => lineareaY(d[0]))
+  .y1((d) => lineareaY(d[1]));
+
+const linearea = d3
+  .line()
+  .x((d) => lineareaX(d.data.work_year))
+  .y((d) => lineareaY(d[1]));
 
 // 散佈圖設置
 const scatterMargin = { top: 20, right: 30, bottom: 40, left: 40 },
@@ -217,6 +234,36 @@ d3.csv("ds_salaries.csv").then((data) => {
         `<input type="checkbox" value="${job}" ${checked} onchange="updateChart()"> ${job}`
       );
   });
+
+  // 初始化折線圖的設置
+  const lineMargin = { top: 20, right: 30, bottom: 40, left: 50 },
+    lineWidth = 960 - lineMargin.left - lineMargin.right,
+    lineHeight = 500 - lineMargin.top - lineMargin.bottom;
+
+  const lineSvg = d3
+    .select("#linechart")
+    .append("svg")
+    .attr("width", lineWidth + lineMargin.left + lineMargin.right)
+    .attr("height", lineHeight + lineMargin.top + lineMargin.bottom)
+    .append("g")
+    .attr("transform", `translate(${lineMargin.left},${lineMargin.top})`);
+
+  const lineX = d3.scaleLinear().range([0, lineWidth]);
+  const lineY = d3.scaleLinear().range([lineHeight, 0]);
+
+  const lineXAxis = lineSvg
+    .append("g")
+    .attr("transform", `translate(0,${lineHeight})`)
+    .attr("class", "axis-label");
+
+  const lineYAxis = lineSvg.append("g").attr("class", "axis-label");
+
+  const lineColor = d3.scaleOrdinal(d3.schemeSet1);
+
+  const line = d3
+    .line()
+    .x((d) => lineX(d.work_year))
+    .y((d) => lineY(d.salary_in_usd));
 
   // 圓餅圖設置
   const pieMargin = { top: 20, right: 30, bottom: 40, left: 40 },
@@ -571,8 +618,9 @@ d3.csv("ds_salaries.csv").then((data) => {
   // 初始顯示所有資料
   updateChart(data);
 
-  // 定義更新圖表的函數
+  // 定義更新各種圖表的函數
   function updateChart(filteredData = data) {
+    // 確保選擇的年份和工作標題
     const selectedYear = d3.select("#yearFilter").property("value");
     const selectedJobs = Array.from(
       document.querySelectorAll("#jobFilter input:checked")
@@ -585,17 +633,6 @@ d3.csv("ds_salaries.csv").then((data) => {
     );
 
     // 計算每個工作標題的數量
-    /*const jobCounts = Array.from(d3.rollup(
-      displayData,
-      v => v.length,
-      d => d.job_title
-      ), ([job_title, count]) => ({ job_title, count }))
-      .sort((a, b) => d3.descending(a.count, b.count))
-      .slice(0, 10); // 只取前十筆
-
-    // 過濾顯示數據，只保留前十個工作標題的數據
-    const filteredDisplayData = displayData.filter(d => jobCounts.map(j => j.job_title).includes(d.job_title));
-    */
     const jobCounts = Array.from(
       d3.rollup(
         displayData,
@@ -604,7 +641,6 @@ d3.csv("ds_salaries.csv").then((data) => {
       ),
       ([job_title, count]) => ({ job_title, count })
     ).sort((a, b) => d3.descending(a.count, b.count));
-    //.slice(0, 10); // 只取前十筆0528註解此行
 
     // 確保選擇的 job_titles 也包含在前十名中
     const selectedJobCounts = jobCounts.filter((j) =>
@@ -651,9 +687,6 @@ d3.csv("ds_salaries.csv").then((data) => {
 
     bars.exit().remove();
 
-    // 更新地理圖
-    updateWorldMap(filteredDisplayData);
-
     // 更新堆積面積圖
     const nestedData = d3
       .groups(filteredDisplayData, (d) => d.work_year)
@@ -665,90 +698,70 @@ d3.csv("ds_salaries.csv").then((data) => {
         return jobData;
       });
 
-    /*const keys = Array.from(new Set(displayData.map((d) => d.job_title)));
-    const stack = d3.stack().keys(keys);*/
     const keys = finalJobCounts.map((d) => d.job_title);
     const stack = d3.stack().keys(keys);
 
-    lineX.domain(d3.extent(filteredDisplayData, (d) => d.work_year));
-    lineY.domain([
+    lineareaX.domain(d3.extent(filteredDisplayData, (d) => d.work_year));
+    lineareaY.domain([
       0,
       d3.max(nestedData, (d) =>
         keys.reduce((acc, key) => acc + (d[key] || 0), 0)
       ),
     ]);
 
-    lineXAxis.call(d3.axisBottom(lineX).tickFormat(d3.format("d")));
-    lineYAxis.call(d3.axisLeft(lineY));
+    lineareaXAxis.call(d3.axisBottom(lineareaX).tickFormat(d3.format("d")));
+    lineareaYAxis.call(d3.axisLeft(lineareaY));
 
     const stackData = stack(nestedData);
 
-    const areas = lineSvg.selectAll(".area").data(stackData, (d) => d.key);
+    const areas = lineareaSvg.selectAll(".area").data(stackData, (d) => d.key);
 
     areas
       .enter()
       .append("path")
       .attr("class", "area")
       .attr("d", area)
-      .style("fill", (d) => color(d.key))
-      .on("mouseover", function (event, d) {
-        tooltip.transition().duration(200).style("opacity", 0.9);
-        const year = lineX.invert(event.layerX);
-        const tooltipData = nestedData.find(
-          (nd) => nd.work_year === Math.round(year)
-        );
-        tooltip
-          .html(getTooltipHtml(tooltipData, Math.round(year)))
-          .style("left", event.pageX + 5 + "px")
-          .style("top", event.pageY - 28 + "px");
-      })
-      .on("mousemove", function (event) {
-        tooltip
-          .style("left", event.pageX + 5 + "px")
-          .style("top", event.pageY - 28 + "px");
-      })
-      .on("mouseout", function () {
-        tooltip.transition().duration(500).style("opacity", 0);
-      });
-
-    areas.attr("d", area);
+      .style("fill", (d) => areaColor(d.key))
+      .merge(areas)
+      .attr("d", area)
+      .style("fill", (d) => areaColor(d.key));
 
     areas.exit().remove();
 
-    // 添加堆積面積圖圖例
-    const legend = lineSvg.selectAll(".legend").data(keys, (d) => d);
+    const lines = lineareaSvg.selectAll(".line").data(stackData, (d) => d.key);
 
-    const legendEnter = legend
+    lines
       .enter()
-      .append("g")
-      .attr("class", "legend")
-      .attr("transform", (d, i) => `translate(0,${i * 20})`);
+      .append("path")
+      .attr("class", "line")
+      .attr("d", linearea)
+      .style("fill", "none")
+      .style("stroke", (d) => lineareaColor(d.key))
+      .style("stroke-width", 2)
+      .merge(lines)
+      .attr("d", linearea)
+      .style("fill", "none")
+      .style("stroke", (d) => lineareaColor(d.key))
+      .style("stroke-width", 2);
 
-    legendEnter
-      .append("rect")
-      .attr("x", lineWidth + 20)
-      .attr("width", 18)
-      .attr("height", 18)
-      .style("fill", (d) => color(d));
+    lines.exit().remove();
 
-    legendEnter
-      .append("text")
-      .attr("x", lineWidth + 45)
-      .attr("y", 9)
-      .attr("dy", ".35em")
-      .style("text-anchor", "start")
-      .text((d) => d);
-
-    legend.exit().remove();
+    // 更新地理圖
+    updateWorldMap(filteredDisplayData);
 
     // 更新散佈圖
     updateScatterPlot(filteredDisplayData);
 
     // 更新圓餅圖
     updatePieCharts(filteredDisplayData);
+
+    // 更新折線圖
+    updateLineChart(filteredDisplayData);
+
+    updateStackedAreaChart(displayData);
   }
 
-  // 定義更新圓餅圖的函數
+  // 定義更新各種圖的函數
   function updatePieCharts(data) {
     // 更新第一個圓餅圖
     const experienceLevelData = Array.from(
@@ -1090,7 +1103,210 @@ d3.csv("ds_salaries.csv").then((data) => {
     });
   }
 
-  // 使 updateChart 和 updateScatterPlot 函數在全局範圍內可訪問
+  function updateLineChart(data) {
+    const companySizes = ["S", "M", "L"];
+    const nestedData = d3.groups(data, (d) => d.work_year);
+    const avgData = nestedData.map(([year, values]) => {
+      const result = { work_year: year };
+      companySizes.forEach((size) => {
+        const sizeData = values.filter((d) => d.company_size === size);
+        result[size] =
+          sizeData.length > 0
+            ? sizeData.reduce((sum, d) => sum + d.salary_in_usd, 0) /
+              sizeData.length
+            : 0;
+      });
+      return result;
+    });
+
+    lineX.domain(d3.extent(data, (d) => d.work_year));
+    lineY.domain([
+      0,
+      d3.max(avgData, (d) => Math.max(d.S || 0, d.M || 0, d.L || 0)),
+    ]);
+
+    lineXAxis.call(d3.axisBottom(lineX).tickFormat(d3.format("d")));
+    lineYAxis.call(d3.axisLeft(lineY));
+
+    companySizes.forEach((size) => {
+      const sizeLine = lineSvg.selectAll(`.line-${size}`).data([avgData]);
+
+      sizeLine
+        .enter()
+        .append("path")
+        .attr("class", `line-${size}`)
+        .attr(
+          "d",
+          line.y((d) => lineY(d[size]))
+        )
+        .style("fill", "none")
+        .style("stroke", lineColor(size))
+        .style("stroke-width", 2)
+        .merge(sizeLine)
+        .attr(
+          "d",
+          line.y((d) => lineY(d[size]))
+        )
+        .style("fill", "none")
+        .style("stroke", lineColor(size))
+        .style("stroke-width", 2);
+
+      sizeLine.exit().remove();
+    });
+
+    // 更新圖例
+    const legend = lineSvg.selectAll(".legend").data(companySizes);
+
+    const legendEnter = legend
+      .enter()
+      .append("g")
+      .attr("class", "legend")
+      .attr("transform", (d, i) => `translate(0,${i * 20})`);
+
+    legendEnter
+      .append("rect")
+      .attr("x", lineWidth + 20)
+      .attr("width", 18)
+      .attr("height", 18)
+      .style("fill", (d) => lineColor(d));
+
+    legendEnter
+      .append("text")
+      .attr("x", lineWidth + 45)
+      .attr("y", 9)
+      .attr("dy", ".35em")
+      .style("text-anchor", "start")
+      .text((d) => d);
+
+    legend.exit().remove();
+  }
+
+  // 更新堆積面積圖
+  function updateStackedAreaChart(data) {
+    // 確保選擇的年份和工作標題
+    const selectedYear = d3.select("#yearFilter").property("value");
+    const selectedJobs = Array.from(
+      document.querySelectorAll("#jobFilter input:checked")
+    ).map((input) => input.value);
+  
+    const displayData = data.filter(
+      (d) =>
+        (selectedYear === "all" || d.work_year == selectedYear) &&
+        selectedJobs.includes(d.job_title)
+    );
+  
+    // 計算每個工作標題的數量
+    const jobCounts = Array.from(
+      d3.rollup(
+        displayData,
+        (v) => v.length,
+        (d) => d.job_title
+      ),
+      ([job_title, count]) => ({ job_title, count })
+    ).sort((a, b) => d3.descending(a.count, b.count));
+  
+    const selectedJobCounts = jobCounts.filter((j) =>
+      selectedJobs.includes(j.job_title)
+    );
+    const remainingSlots = Math.max(10 - selectedJobCounts.length, 0);
+    const topJobCounts = jobCounts
+      .filter((j) => !selectedJobs.includes(j.job_title))
+      .slice(0, remainingSlots);
+    const finalJobCounts = selectedJobCounts.concat(topJobCounts);
+  
+    const filteredDisplayData = displayData.filter((d) =>
+      finalJobCounts.map((j) => j.job_title).includes(d.job_title)
+    );
+  
+    const nestedData = d3
+      .groups(filteredDisplayData, (d) => d.work_year)
+      .map(([key, values]) => {
+        const jobData = { work_year: key };
+        values.forEach((d) => {
+          jobData[d.job_title] = (jobData[d.job_title] || 0) + 1;
+        });
+        return jobData;
+      });
+  
+    const keys = finalJobCounts.map((d) => d.job_title);
+    const stack = d3.stack().keys(keys);
+  
+    lineareaX.domain(d3.extent(filteredDisplayData, (d) => d.work_year));
+    lineareaY.domain([
+      0,
+      d3.max(nestedData, (d) =>
+        keys.reduce((acc, key) => acc + (d[key] || 0), 0)
+      ),
+    ]);
+  
+    lineareaXAxis.call(d3.axisBottom(lineareaX).tickFormat(d3.format("d")));
+    lineareaYAxis.call(d3.axisLeft(lineareaY));
+  
+    const stackData = stack(nestedData);
+  
+    const areas = lineareaSvg.selectAll(".area").data(stackData, (d) => d.key);
+  
+    areas
+      .enter()
+      .append("path")
+      .attr("class", "area")
+      .attr("d", area)
+      .style("fill", (d) => areaColor(d.key))
+      .merge(areas)
+      .attr("d", area)
+      .style("fill", (d) => areaColor(d.key));
+  
+    areas.exit().remove();
+  
+    const lines = lineareaSvg.selectAll(".line").data(stackData, (d) => d.key);
+  
+    lines
+      .enter()
+      .append("path")
+      .attr("class", "line")
+      .attr("d", linearea)
+      .style("fill", "none")
+      .style("stroke", (d) => lineareaColor(d.key))
+      .style("stroke-width", 2)
+      .merge(lines)
+      .attr("d", linearea)
+      .style("fill", "none")
+      .style("stroke", (d) => lineareaColor(d.key))
+      .style("stroke-width", 2);
+  
+    lines.exit().remove();
+  
+    // 更新圖例
+    const legendItems = legendSvg.selectAll(".legend-item").data(keys);
+  
+    legendItems.exit().remove(); // 清理舊圖例項目
+  
+    const legendEnter = legendItems
+      .enter()
+      .append("g")
+      .attr("class", "legend-item")
+      .attr("transform", (d, i) => `translate(0, ${i * 25})`);
+  
+    legendEnter
+      .append("rect")
+      .attr("width", 18)
+      .attr("height", 18)
+      .style("fill", (d) => areaColor(d));
+  
+    legendEnter
+      .append("text")
+      .attr("x", 24)
+      .attr("y", 9)
+      .attr("dy", ".35em")
+      .style("text-anchor", "start")
+      .text((d) => d);
+  
+    legendItems.merge(legendEnter);
+  
+    legendItems.exit().remove(); // 確保刪除多餘的圖例項目
+  }
+
+  // 使 updateChart 函數在全局範圍內可訪問
   window.updateChart = () => {
     const selectedYear = d3.select("#yearFilter").property("value");
     const selectedJobs = Array.from(
@@ -1104,6 +1320,8 @@ d3.csv("ds_salaries.csv").then((data) => {
     );
 
     updateChart(displayData);
+    updateLineChart(displayData);
+    updateStackedAreaChart(displayData); // 更新堆疊面積圖
   };
 
   // window.updateScatterPlot = () => {
@@ -1125,11 +1343,10 @@ d3.csv("ds_salaries.csv").then((data) => {
     let html = `<strong>${year}年</strong><br/>`;
     Object.keys(data).forEach((key) => {
       if (key !== "work_year") {
-        html += `<span style="color:${color(key)}">${key}</span>: ${
-          data[key]
-        }<br/>`;
+        html += `<span style="color:${color(key)}">${key}</span>: ${data[key]}<br/>`;
       }
     });
     return html;
   }
 });
+

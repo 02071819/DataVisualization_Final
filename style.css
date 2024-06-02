@@ -3,7 +3,7 @@
 } */
 
 body {
-    font-family: Arial, sans-serif
+    font-family: Arial, sans-serif;
   }
 
   
@@ -12,7 +12,6 @@ svg {
     margin: 20px;
   }
   
-
 /* 添加一些基本的樣式 */
 /* Header styles */
 .header {
@@ -140,7 +139,7 @@ a:hover {
   justify-content: center;
 }
 
-#lineChart {
+#LineAreaChart {
   display: flex;
   padding-top: 60px;
   padding-top: 200px;

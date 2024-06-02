@@ -27,7 +27,7 @@
       <a href="./index1.html">Pie Chart</a>
       <a href="./index2.html">Bar Chart</a>
       <a href="./index3.html">Stacked Area Chart</a>
-      <a href="./index4.html">Scatterplot Chart</a>
+      <a href="./index4.html">Line Chart</a>
     </div>
 
     <div class="sidebar" id="sidebar">
@@ -40,26 +40,15 @@
 
     <div class="main-content">
       <div class="end_div">
-        <!-- 散佈圖下拉選單 -->
-        <div class="scatterplot_part">
-          <div class="scatterplot_control">
-            <label for="xAxisSelect">X-Axis:</label>
-            <select id="xAxisSelect" onchange="updateScatterPlot()">
-              <option value="remote_ratio">Remote Ratio</option>
-              <option value="salary_in_usd">Salary in USD</option>
-              <option value="work_year">Work Year</option>
-            </select>
+        <!-- 折線圖下拉選單 -->
+        <div class="linechart_part">
+          <!-- 折線圖容器 -->
+          <div id="linechart"></div>
 
-            <label for="yAxisSelect">Y-Axis:</label>
-            <select id="yAxisSelect" onchange="updateScatterPlot()">
-              <option value="salary_in_usd">Salary in USD</option>
-              <option value="remote_ratio">Remote Ratio</option>
-              <option value="work_year">Work Year</option>
-            </select>
-          </div>
-          <!-- 散佈圖容器 -->
-          <div id="scatterPlot"></div>
         </div>
+        <select id="xAxisSelect" onchange="updateScatterPlot()"></select>
+
+        <select id="yAxisSelect" onchange="updateScatterPlot()"></select>
       </div>
     </div>
 
