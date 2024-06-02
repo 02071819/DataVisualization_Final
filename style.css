@@ -145,3 +145,11 @@ a:hover {
   padding-top: 200px;
   padding-left: 100px;
 }
+
+#linechart {
+  display: flex;
+  padding-top: 60px;
+  padding-right: 100px;
+  align-content: center;
+  justify-content: center;
+}
