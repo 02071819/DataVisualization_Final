@@ -632,33 +632,33 @@ d3.csv("ds_salaries.csv").then((data) => {
         selectedJobs.includes(d.job_title)
     );
   
-    // 計算每個工作標題的數量
-    const jobCounts = Array.from(
+    // 計算每個工作標題的平均薪水
+    const jobSalaries = Array.from(
       d3.rollup(
         displayData,
-        (v) => v.length,
+        (v) => d3.mean(v, (d) => d.salary_in_usd),
         (d) => d.job_title
       ),
-      ([job_title, count]) => ({ job_title, count })
-    ).sort((a, b) => d3.descending(a.count, b.count));
+      ([job_title, salary]) => ({ job_title, salary: Math.round(salary) }) // 四捨五入
+    ).sort((a, b) => d3.descending(a.salary, b.salary));
   
     // 確保選擇的 job_titles 也包含在前十名中
-    const selectedJobCounts = jobCounts.filter((j) =>
+    const selectedJobSalaries = jobSalaries.filter((j) =>
       selectedJobs.includes(j.job_title)
     );
-    const remainingSlots = Math.max(10 - selectedJobCounts.length, 0);
-    const topJobCounts = jobCounts
+    const remainingSlots = Math.max(10 - selectedJobSalaries.length, 0);
+    const topJobSalaries = jobSalaries
       .filter((j) => !selectedJobs.includes(j.job_title))
       .slice(0, remainingSlots);
-    const finalJobCounts = selectedJobCounts.concat(topJobCounts);
+    const finalJobSalaries = selectedJobSalaries.concat(topJobSalaries);
   
     // 過濾顯示數據，只保留最終選中的前十個工作標題的數據
     const filteredDisplayData = displayData.filter((d) =>
-      finalJobCounts.map((j) => j.job_title).includes(d.job_title)
+      finalJobSalaries.map((j) => j.job_title).includes(d.job_title)
     );
   
-    x.domain(finalJobCounts.map((d) => d.job_title));
-    y.domain([0, d3.max(filteredDisplayData, (d) => d.salary_in_usd)]);
+    x.domain(finalJobSalaries.map((d) => d.job_title));
+    y.domain([0, d3.max(finalJobSalaries, (d) => d.salary)]);
   
     xAxis
       .call(d3.axisBottom(x))
@@ -668,7 +668,7 @@ d3.csv("ds_salaries.csv").then((data) => {
   
     yAxis.call(d3.axisLeft(y));
   
-    const bars = svg.selectAll(".bar").data(filteredDisplayData);
+    const bars = svg.selectAll(".bar").data(finalJobSalaries);
   
     bars
       .enter()
@@ -676,13 +676,13 @@ d3.csv("ds_salaries.csv").then((data) => {
       .attr("class", "bar")
       .attr("x", (d) => x(d.job_title))
       .attr("width", x.bandwidth())
-      .attr("y", (d) => y(d.salary_in_usd))
-      .attr("height", (d) => height - y(d.salary_in_usd))
+      .attr("y", (d) => y(d.salary))
+      .attr("height", (d) => height - y(d.salary))
       .on("mouseover", function (event, d) {
         tooltip.transition().duration(200).style("opacity", 0.9);
         tooltip
           .html(
-            `Job: ${d.job_title}<br>Salary: $${d.salary_in_usd}<br>Year: ${d.work_year}`
+            `Job: ${d.job_title}<br>Salary: $${d.salary}<br>Year: ${selectedYear}`
           )
           .style("left", event.pageX + 5 + "px")
           .style("top", event.pageY - 28 + "px");
@@ -699,8 +699,8 @@ d3.csv("ds_salaries.csv").then((data) => {
     bars
       .attr("x", (d) => x(d.job_title))
       .attr("width", x.bandwidth())
-      .attr("y", (d) => y(d.salary_in_usd))
-      .attr("height", (d) => height - y(d.salary_in_usd));
+      .attr("y", (d) => y(d.salary))
+      .attr("height", (d) => height - y(d.salary));
   
     bars.exit().remove();
   
@@ -1035,9 +1035,9 @@ d3.csv("ds_salaries.csv").then((data) => {
 
       legendSvg
         .append("text")
-        .attr("x", legendWidth / 2 - 20)
-        .attr("y", 50)
-        .text("公司總數");
+        .attr("x", legendWidth / 2 - 60)
+        .attr("y", 60)
+        .text("Total of companies");
 
       legendSvg
         .append("g")
@@ -1327,8 +1327,8 @@ d3.csv("ds_salaries.csv").then((data) => {
   };
 
   function getTooltipHtml(d) {
-    return `<strong>${d.work_year}</strong><br/>S: ${d.S || 0}<br/>M: ${d.M || 0}<br/>L: ${d.L || 0}`;
-  }
+    return `<strong>${d.work_year}</strong><br/>S: ${Math.round(d.S) || 0}<br/>M: ${Math.round(d.M) || 0}<br/>L: ${Math.round(d.L) || 0}`;
+  }  
 });
 
 // 在篩選選項更改時調用 updateChart 函數
